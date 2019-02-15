@@ -139,8 +139,8 @@
 				<add as="align" value="center"/>
 				<add as="verticalAlign" value="middle"/>
 				<add as="shadow" value="0"/>
-				<add as="strokeColor" value="#C3D9FF"/>
-				<add as="fillColor" value="#C3D9FF"/>
+				<add as="strokeColor" value="#000000"/>
+				<add as="fillColor" value="#FFFFFF"/>
 				<add as="gradientColor" value="white"/>
 			</add>
 			<add as="group">
@@ -200,30 +200,10 @@
 			<add as="doubleEllipse" extend="ellipse">
 				<add as="shape" value="doubleEllipse"/>
 			</add>
-			<add as="rhombus">
-				<add as="shape" value="rhombus"/>
-				<add as="perimeter" value="rhombusPerimeter"/>
-				<add as="strokeColor" value="#FFCF8A"/>
-				<add as="fillColor" value="#FFCF8A"/>
-			</add>
 			<add as="triangle" extend="rhombus">
 				<add as="shape" value="triangle"/>
 				<add as="perimeter" value="trianglePerimeter"/>
 				<add as="align" value="left"/>
-			</add>
-			<add as="hexagon">
-				<add as="shape" value="hexagon"/>
-			</add>
-			<add as="actor">
-				<add as="shape" value="actor"/>
-				<add as="strokeColor" value="#FFC7C7"/>
-				<add as="fillColor" value="#FFC7C7"/>
-			</add>
-			<add as="cloud">
-				<add as="shape" value="cloud"/>
-				<add as="perimeter" value="ellipsePerimeter"/>
-				<add as="strokeColor" value="#CDEB8B"/>
-				<add as="fillColor" value="#CDEB8B"/>
 			</add>
 			<add as="cylinder">
 				<add as="shape" value="cylinder"/>

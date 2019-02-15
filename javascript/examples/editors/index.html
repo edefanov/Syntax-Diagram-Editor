@@ -162,9 +162,9 @@
 						var format = 'png';
 						var bg = '&bg=#FFFFFF';
 
-						// new mxXmlRequest(editor.urlImage, 'filename=' + name + '&format=' + format +
-		        // 			bg + '&w=' + w + '&h=' + h + '&xml=' + encodeURIComponent(xml)).
-		        // 			simulate(document, '_blank');
+						new mxXmlRequest(editor.urlImage, 'filename=' + name + '&format=' + format +
+		        			bg + '&w=' + w + '&h=' + h + '&xml=' + encodeURIComponent(xml)).
+		        			simulate(document, '_blank');
 					}
 				};
 
@@ -256,19 +256,21 @@
 			mxUtils.write(node, ', ');
 			mxUtils.linkAction(node, 'Fit', editor, 'fit');
 
-
+			var variables = new Array();
 
 			// add new container toolbar button action
 			editor.addAction('addNewContainer', function(editor, cell){
 				var label = prompt("Syntax Unit Name", "name");
 				if (label != null) {
+					variables.push(label);
+					console.log(variables);
 				  label = label + ":";
 					var parent = editor.graph.getDefaultParent();
 					var cellList = editor.graph.model.getChildCount(parent)
 					var x = 0;
 					var y = 0;
 					var index = cellList + 1
-					console.log(index);
+					//console.log(index);
 
 					// adding a container
 
@@ -302,23 +304,64 @@
 					var edgeClone = editor.graph.model.cloneCell(edgeTemplate);
 					var ellipseEdge = editor.graph.addEdge(edgeClone, newContainer, firstEllipse, secondEllipse);
 
-					// adding overlays - add buttons
+					// adding overlays - add button
 
-					var overlayString = new mxCellOverlay(new mxImage('images/add.png', 32, 32), 'Add New String');
-					overlayString.cursor = 'hand';
-					overlayString.offset.x = -18;
-					editor.graph.addCellOverlay(ellipseEdge, overlayString);
+					var overlay = new mxCellOverlay(new mxImage('images/add.png', 28, 28), 'Add New Element');
+					overlay.cursor = 'hand';
+					editor.graph.addCellOverlay(ellipseEdge, overlay);
 
+					// overlay click event
 
+					overlay.addListener(mxEvent.CLICK, function(sender, evt2)
+					{
+						editor.graph.clearSelection();
+						var labelNewString = prompt("String", "Enter here");
+						var coincd = 0;
+						if (labelNewString != null) {
+							for (i = 0; i< variables.length; i++) {
+								// console.log(labelNewString.localeCompare(variables[i]));
+								// console.log(labelNewString);
+								// console.log(variables[i]);
+								if (labelNewString.localeCompare(variables[i]) == 0)
+								{
+									coincd++;
+								}
+							}
+							if (coincd > 0) {
+								var stringTemplate = editor.templates['rectangle'];
+							} else {
+								var stringTemplate = editor.templates['rounded'];
+							}
+							console.log(stringTemplate);
+							var stringClone = editor.graph.model.cloneCell(stringTemplate);
+							stringClone.setAttribute('label', labelNewString);
+							var stringRectangle = editor.graph.model.add(newContainer, stringClone, index);
+							var stringRectangleGeo = editor.graph.getCellGeometry(stringRectangle).clone();
+							stringRectangleGeo.height = 30;
+							stringRectangleGeo.y = secondEllipseGeo.y-10;
+							stringRectangleGeo.x = (((secondEllipseGeo.x - firstEllipseGeo.x) / 2) + firstEllipseGeo.x - (stringRectangleGeo.width / 2));
+							editor.graph.model.setGeometry(stringRectangle, stringRectangleGeo);
+							var leftsideEdge = editor.graph.addEdge(edgeClone, newContainer, firstEllipse, stringRectangle);
+							var rightsideEdge = editor.graph.addEdge(edgeClone, newContainer, stringRectangle, secondEllipse);
+							//console.log(stringRectangleGeo);
 
-					var overlayVar = new mxCellOverlay(new mxImage('images/add.png', 32, 32), 'Add New Variable');
-					overlayVar.cursor = 'hand';
-					overlayVar.offset.x = 18;
-					editor.graph.addCellOverlay(ellipseEdge, overlayVar);
+							// resizing container to the right and moving the right ellipse  + overlay
+
+							var containerGeo = editor.graph.getCellGeometry(newContainer).clone();
+							containerGeo.width += 25;
+							secondEllipseGeo.x = containerGeo.width*0.9;
+							editor.graph.model.setGeometry(secondEllipse, secondEllipseGeo);
+							editor.graph.model.setGeometry(newContainer, containerGeo);
+
+							overlay.offset.x = 55;
+							overlay.cursor = 'hand';
+						}
+
+					});
 
 
 					editor.graph.refresh();
-				  console.log(firstEllipseGeo);
+				  //console.log(firstEllipseGeo);
 			}
 		})
 	}
