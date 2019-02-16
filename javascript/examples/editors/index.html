@@ -307,6 +307,8 @@
 					// adding overlays - add button
 
 					var overlay = new mxCellOverlay(new mxImage('images/add.png', 28, 28), 'Add New Element');
+					overlay.offset.x = secondEllipseGeo.x - firstEllipseGeo.x;
+					console.log('secondEllipseGeo.x = ', secondEllipseGeo.x, ' firstEllipseGeo.x = ', firstEllipseGeo.x, ' overlay offset x = ', overlay.offset.x);
 					overlay.cursor = 'hand';
 					editor.graph.addCellOverlay(ellipseEdge, overlay);
 
@@ -318,7 +320,7 @@
 						var labelNewString = prompt("String", "Enter here");
 						var coincd = 0;
 						if (labelNewString != null) {
-							for (i = 0; i< variables.length; i++) {
+							for (i = 0; i < variables.length; i++) {
 								// console.log(labelNewString.localeCompare(variables[i]));
 								// console.log(labelNewString);
 								// console.log(variables[i]);
@@ -335,26 +337,38 @@
 							console.log(stringTemplate);
 							var stringClone = editor.graph.model.cloneCell(stringTemplate);
 							stringClone.setAttribute('label', labelNewString);
+							// searching for far right cell x coordinate
+							var containerChildren = editor.graph.model.getChildren(newContainer);
+							console.log(containerChildren);
+							var farRightX = 0;
+							for (i = 0; i < containerChildren.length; i++) {
+								var cellType = containerChildren[i].getValue();
+								if (cellType.tagName == 'Rect' || cellType.tagName == 'Roundrect') {
+									var geoCompare = containerChildren[i].getGeometry();
+									console.log('geoCompare.x = ', geoCompare.x);
+										if (geoCompare.x > farRightX) {
+											farRightX = geoCompare.x + geoCompare.width/2;
+											console.log('farRightX = ', farRightX);
+										}
+								}
+							}
+							// adding the cell and moving it
 							var stringRectangle = editor.graph.model.add(newContainer, stringClone, index);
 							var stringRectangleGeo = editor.graph.getCellGeometry(stringRectangle).clone();
-							stringRectangleGeo.height = 30;
-							stringRectangleGeo.y = secondEllipseGeo.y-10;
-							stringRectangleGeo.x = (((secondEllipseGeo.x - firstEllipseGeo.x) / 2) + firstEllipseGeo.x - (stringRectangleGeo.width / 2));
+							stringRectangleGeo.height = 20;
+							stringRectangleGeo.y = secondEllipseGeo.y-6;
+							stringRectangleGeo.x = (((secondEllipseGeo.x - firstEllipseGeo.x) / 2) + firstEllipseGeo.x - (stringRectangleGeo.width / 2) + farRightX);
 							editor.graph.model.setGeometry(stringRectangle, stringRectangleGeo);
-							var leftsideEdge = editor.graph.addEdge(edgeClone, newContainer, firstEllipse, stringRectangle);
-							var rightsideEdge = editor.graph.addEdge(edgeClone, newContainer, stringRectangle, secondEllipse);
 							//console.log(stringRectangleGeo);
 
 							// resizing container to the right and moving the right ellipse  + overlay
 
 							var containerGeo = editor.graph.getCellGeometry(newContainer).clone();
-							containerGeo.width += 25;
+							containerGeo.width += stringRectangleGeo.x - farRightX;
 							secondEllipseGeo.x = containerGeo.width*0.9;
 							editor.graph.model.setGeometry(secondEllipse, secondEllipseGeo);
 							editor.graph.model.setGeometry(newContainer, containerGeo);
-
-							overlay.offset.x = 55;
-							overlay.cursor = 'hand';
+							overlay.offset.x = 0.65*secondEllipseGeo.x - firstEllipseGeo.x;
 						}
 
 					});
