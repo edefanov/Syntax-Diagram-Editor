@@ -45,8 +45,8 @@
 			editor.graph.connectionHandler.setCreateTarget(true);
 
 			// Title
-			var title = document.getElementById('title');
-			title.innerHTML = 'Syntax Diagram Editor'
+			//var title = document.getElementById('title');
+			//title.innerHTML = 'Syntax Diagram Editor'
 
 		    // Changes the zoom on mouseWheel events
 		    mxEvent.addMouseWheelListener(function (evt, up)
@@ -284,7 +284,7 @@
 
 					template = editor.templates['shape'];
 					var clone = editor.graph.model.cloneCell(template);
-					index ++;
+					index++;
 					var firstEllipse = editor.graph.model.add(newContainer, clone, index);
 					var clone = editor.graph.model.cloneCell(template);
 					index++;
@@ -310,6 +310,7 @@
 					overlay.offset.x = secondEllipseGeo.x - firstEllipseGeo.x;
 					console.log('secondEllipseGeo.x = ', secondEllipseGeo.x, ' firstEllipseGeo.x = ', firstEllipseGeo.x, ' overlay offset x = ', overlay.offset.x);
 					overlay.cursor = 'hand';
+					overlay.defaultOverlap = 0.5
 					editor.graph.addCellOverlay(ellipseEdge, overlay);
 
 					// overlay click event
@@ -317,7 +318,7 @@
 					overlay.addListener(mxEvent.CLICK, function(sender, evt2)
 					{
 						editor.graph.clearSelection();
-						var labelNewString = prompt("String", "Enter here");
+						var labelNewString = prompt("New Element Name", "Enter here");
 						var coincd = 0;
 						if (labelNewString != null) {
 							for (i = 0; i < variables.length; i++) {
@@ -334,12 +335,16 @@
 							} else {
 								var stringTemplate = editor.templates['rounded'];
 							}
-							console.log(stringTemplate);
+							//console.log(stringTemplate);
 							var stringClone = editor.graph.model.cloneCell(stringTemplate);
 							stringClone.setAttribute('label', labelNewString);
+
 							// searching for far right cell x coordinate
+							console.log(' ')
+							console.log(' ')
+
 							var containerChildren = editor.graph.model.getChildren(newContainer);
-							console.log(containerChildren);
+							//console.log('container children, ', containerChildren);
 							var farRightX = 0;
 							for (i = 0; i < containerChildren.length; i++) {
 								var cellType = containerChildren[i].getValue();
@@ -348,34 +353,68 @@
 									console.log('geoCompare.x = ', geoCompare.x);
 										if (geoCompare.x > farRightX) {
 											farRightX = geoCompare.x + geoCompare.width/2;
+											var geoCompareF = geoCompare;
 											console.log('farRightX = ', farRightX);
+											console.log('geoCompare', geoCompare);
 										}
 								}
 							}
+
 							// adding the cell and moving it
 							var stringRectangle = editor.graph.model.add(newContainer, stringClone, index);
 							var stringRectangleGeo = editor.graph.getCellGeometry(stringRectangle).clone();
 							stringRectangleGeo.height = 20;
+							console.log('width, = ', stringRectangleGeo.width)
 							stringRectangleGeo.y = secondEllipseGeo.y-6;
-							stringRectangleGeo.x = (((secondEllipseGeo.x - firstEllipseGeo.x) / 2) + firstEllipseGeo.x - (stringRectangleGeo.width / 2) + farRightX);
+							if (typeof geoCompare != "undefined"){
+								stringRectangleGeo.x = farRightX + geoCompareF.width;
+							} else {
+								stringRectangleGeo.x = (((secondEllipseGeo.x - firstEllipseGeo.x) / 2) - (stringRectangleGeo.width / 2) + farRightX);
+							}
 							editor.graph.model.setGeometry(stringRectangle, stringRectangleGeo);
 							//console.log(stringRectangleGeo);
 
-							// resizing container to the right and moving the right ellipse  + overlay
-
+							// resizing container to the right (using the far right coordinate + offset) and moving the right ellipse  + overlay
+							var farRightX1 = 0
+							var containerChildren1 = editor.graph.model.getChildren(newContainer);
+							for (i = 0; i < containerChildren1.length; i++) {
+								var cellType1 = containerChildren1[i].getValue();
+								var geoCompare1 = containerChildren[i].getGeometry();
+										if (geoCompare1.x > farRightX) {
+											farRightX1 = geoCompare1.x + geoCompare1.width;
+										}
+							}
 							var containerGeo = editor.graph.getCellGeometry(newContainer).clone();
-							containerGeo.width += stringRectangleGeo.x - farRightX;
-							secondEllipseGeo.x = containerGeo.width*0.9;
+							var containerGeoPrev = containerGeo
+							containerGeo.width = farRightX1 + 55;
+							console.log('stringRectangleGeo.x = ', stringRectangleGeo.x);
+							console.log('farRightX = ', farRightX);
+							secondEllipseGeo.x = containerGeo.width-10;
 							editor.graph.model.setGeometry(secondEllipse, secondEllipseGeo);
 							editor.graph.model.setGeometry(newContainer, containerGeo);
-							overlay.offset.x = 0.65*secondEllipseGeo.x - firstEllipseGeo.x;
+							console.log('containerWidth', containerGeo.width)
+							//overlay.offset.x = containerGeo.width + 20;
+							console.log('overlay', overlay.offset.x)
 						}
 
 					});
 
+					overlay.getBounds = function(state)
+					{
+					  var bounds = mxCellOverlay.prototype.getBounds.apply(this, arguments);
+
+					  if (state.view.graph.getModel().isEdge(state.cell))
+					  {
+					    var pt = state.view.getPoint(state, {x: 1, y: 0, relative: true});
+
+					    bounds.x = pt.x - bounds.width / 2;
+					    bounds.y = pt.y - bounds.height / 2;
+					  }
+
+					  return bounds;
+					};
 
 					editor.graph.refresh();
-				  //console.log(firstEllipseGeo);
 			}
 		})
 	}
@@ -386,11 +425,6 @@
 </head>
 <body onload="createEditor('config/diagrameditor.xml');">
 	<div id="page">
-		<div id="header">
-			<div id="headerimg" style="overflow:hidden;">
-				<h1 id="title">mxDraw</h1>
-			</div>
-		</div>
 		<div id="mainActions"
 			style="width:100%;padding-top:8px;padding-left:24px;padding-bottom:8px;">
 		</div>
@@ -418,9 +452,6 @@
 		<div id="zoomActions" style="width:100%;padding-left:54px;padding-top:4px;">
 		</div>
 		<div id="footer">
-			<p id="status">
-
-			</p>
 			<br/>
 		</div>
 	</div>
