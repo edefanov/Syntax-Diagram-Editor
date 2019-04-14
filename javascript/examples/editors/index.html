@@ -262,20 +262,65 @@
 			editor.addAction('addNewContainer', function(editor, cell){
 				var label = prompt("Syntax Unit Name", "name");
 				if (label != null) {
+					var i = 0;
 					variables.push(label);
-					console.log(variables);
 				  label = label + ":";
 					var parent = editor.graph.getDefaultParent();
-					var cellList = editor.graph.model.getChildCount(parent)
+					var cellList = editor.graph.model.getChildCount(parent);
+					// checking if containers already exist within the graph
+					if (cellList > 0) {
+						var containerList = editor.graph.getChildCells(parent);
+						var lowestY = 0
+						// searching for the lowest container
+						for (i = 0; i < containerList.length; i++) {
+							if (containerList[i].style == 'swimlane') {
+								var contGeoComp = containerList[i].getGeometry();
+								if (contGeoComp.y + contGeoComp.height >= lowestY) {
+									lowestY = contGeoComp.y + contGeoComp.height;
+								}
+							}
+						}
+						// setting the y coordinate to the lowest found
+						var y = lowestY;
+					} else {
+						var y = 0;
+					}
 					var x = 0;
-					var y = 0;
-					var index = cellList + 1
-					//console.log(index);
+					var index = cellList + 1;
+
+					// refreshing the existing elements if we add a new non-terminal
+					var coincd1 = 0
+					var containerList = editor.graph.getChildCells(parent);
+					for (i = 0; i < containerList.length; i++) {
+						if (containerList[i].style == 'swimlane') {
+							var containerChildren = editor.graph.model.getChildren(containerList[i]);
+							for (z = 0; z < containerChildren.length; z++) {
+								var cellType = containerChildren[z].getValue();
+								if (cellType.tagName == 'Roundrect') {
+									for (t = 0; t < variables.length; t++) {
+										var tempLabel = containerChildren[z].getAttribute('label');
+										if (tempLabel.localeCompare(variables[t]) == 0)
+										{
+											coincd1++;
+										}
+									}
+									if (coincd1 > 0) {
+										editor.graph.model.setStyle(containerChildren[z], 'Rect')
+									}
+								}
+							}
+						}
+					}
+
 
 					// adding a container
 
 					var template = editor.templates['container'];
 					var clone = editor.graph.model.cloneCell(template);
+					var cloneGeo = clone.getGeometry();
+					cloneGeo.y = y;
+					cloneGeo.height = 100;
+					editor.graph.model.setGeometry(clone, cloneGeo);
 					clone.setAttribute('label', label);
 					var newContainer = editor.graph.model.add(parent, clone, index);
 					editor.graph.scrollCellToVisible(newContainer);
@@ -310,7 +355,6 @@
 					overlay.offset.x = secondEllipseGeo.x - firstEllipseGeo.x;
 					console.log('secondEllipseGeo.x = ', secondEllipseGeo.x, ' firstEllipseGeo.x = ', firstEllipseGeo.x, ' overlay offset x = ', overlay.offset.x);
 					overlay.cursor = 'hand';
-					overlay.defaultOverlap = 0.5
 					editor.graph.addCellOverlay(ellipseEdge, overlay);
 
 					// overlay click event
@@ -322,9 +366,6 @@
 						var coincd = 0;
 						if (labelNewString != null) {
 							for (i = 0; i < variables.length; i++) {
-								// console.log(labelNewString.localeCompare(variables[i]));
-								// console.log(labelNewString);
-								// console.log(variables[i]);
 								if (labelNewString.localeCompare(variables[i]) == 0)
 								{
 									coincd++;
@@ -344,7 +385,6 @@
 							console.log(' ')
 
 							var containerChildren = editor.graph.model.getChildren(newContainer);
-							//console.log('container children, ', containerChildren);
 							var farRightX = 0;
 							for (i = 0; i < containerChildren.length; i++) {
 								var cellType = containerChildren[i].getValue();
@@ -354,8 +394,6 @@
 										if (geoCompare.x > farRightX) {
 											farRightX = geoCompare.x + geoCompare.width/2;
 											var geoCompareF = geoCompare;
-											console.log('farRightX = ', farRightX);
-											console.log('geoCompare', geoCompare);
 										}
 								}
 							}
@@ -364,7 +402,7 @@
 							var stringRectangle = editor.graph.model.add(newContainer, stringClone, index);
 							var stringRectangleGeo = editor.graph.getCellGeometry(stringRectangle).clone();
 							stringRectangleGeo.height = 20;
-							console.log('width, = ', stringRectangleGeo.width)
+							console.log('width, = ', stringRectangleGeo.width);
 							stringRectangleGeo.y = secondEllipseGeo.y-6;
 							if (typeof geoCompare != "undefined"){
 								stringRectangleGeo.x = farRightX + geoCompareF.width;
@@ -394,7 +432,6 @@
 							editor.graph.model.setGeometry(newContainer, containerGeo);
 							console.log('containerWidth', containerGeo.width)
 							//overlay.offset.x = containerGeo.width + 20;
-							console.log('overlay', overlay.offset.x)
 						}
 
 					});
@@ -414,6 +451,14 @@
 					  return bounds;
 					};
 
+					// @todo:
+					// re-align non-terminals
+					// add overlay toggle
+					// refactor connections
+					// add vertical elements editing
+					// image saving
+					// ebnf saving
+					// redo gui
 					editor.graph.refresh();
 			}
 		})
