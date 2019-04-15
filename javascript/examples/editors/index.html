@@ -357,7 +357,7 @@
 					overlay.cursor = 'hand';
 					editor.graph.addCellOverlay(ellipseEdge, overlay);
 
-					// overlay click event
+					// add new element overlay click event
 
 					overlay.addListener(mxEvent.CLICK, function(sender, evt2)
 					{
@@ -376,14 +376,18 @@
 							} else {
 								var stringTemplate = editor.templates['rounded'];
 							}
-							//console.log(stringTemplate);
 							var stringClone = editor.graph.model.cloneCell(stringTemplate);
 							stringClone.setAttribute('label', labelNewString);
+							// getting text width and resizing the rectangle if needed
+							var contGeo = stringClone.getGeometry();
+							contGeo.width = Math.round(getTextWidth(labelNewString, '11px arial')) + 30;
+							editor.graph.model.setGeometry(stringClone, contGeo);
+
+
+							console.log(' ')
+							console.log(' ')
 
 							// searching for far right cell x coordinate
-							console.log(' ')
-							console.log(' ')
-
 							var containerChildren = editor.graph.model.getChildren(newContainer);
 							var farRightX = 0;
 							for (i = 0; i < containerChildren.length; i++) {
@@ -451,6 +455,15 @@
 					  return bounds;
 					};
 
+					// measuring the text width
+					function getTextWidth(text, font) {
+	    			var canvas = getTextWidth.canvas || (getTextWidth.canvas = document.createElement("canvas"));
+				    var context = canvas.getContext("2d");
+				    context.font = font;
+				    var metrics = context.measureText(text);
+				    return metrics.width;
+					}
+
 					// @todo:
 					// re-align non-terminals
 					// add overlay toggle
@@ -459,6 +472,7 @@
 					// image saving
 					// ebnf saving
 					// redo gui
+					// rectangle width based on text width
 					editor.graph.refresh();
 			}
 		})
