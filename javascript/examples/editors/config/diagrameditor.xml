@@ -185,8 +185,8 @@
 				<add as="startSize" value="45"/>
 				<add as="align" value="left"/>
 				<add as="verticalAlign" value="top"/>
-				<add as="strokeColor" value="#FFFFFF"/>
-				<add as="fillColor" value="#FFFFFF"/>
+				<add as="strokeColor" value="none"/>
+				<add as="fillColor" value="none"/>
 			</add>
 			<add as="rounded">
 				<add as="rounded" value="1"/>
