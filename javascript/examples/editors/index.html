@@ -11,7 +11,7 @@
 	</script>
 	<script type="text/javascript" src="../../src/js/mxClient.js"></script>
 	<script type="text/javascript" src="js/app.js"></script>
-	<script type="text/javascript" src="js/saveSvgAsPng.js"></script>
+	<script src="https://cdn.jsdelivr.net/npm/canvg/dist/browser/canvg.min.js"></script>
 	<script type="text/javascript">
 		// Program starts here. The document.onLoad executes the
 		// createEditor function with a given configuration.
@@ -195,6 +195,8 @@
 				// Client-side code for image export
 				var exportImage = function(editor)
 				{
+					overlayInput.checked = false;
+					toggleOverlay(editor);
 					var graph = editor.graph;
 					var scale = graph.view.scale;
 					var bounds = graph.getGraphBounds();
@@ -230,8 +232,31 @@
     					svg1.indexOf("<svg"),
 					    svg1.indexOf("</svg>")+6
 						);
+						var canvas = document.createElement('canvas');
+						canvg(canvas, SVGCode, {userCORS: true});
+						var dataURL = canvas.toDataURL('image/png');
+						var data = atob(dataURL.substring('data:image/png;base64,'.length)),
+        			asArray = new Uint8Array(data.length);
+						for (var i = 0, len = data.length; i < len; ++i) {
+	    					asArray[i] = data.charCodeAt(i);
+						}
+						var pngBlob = new Blob([asArray.buffer], {type: 'image/png'});
+						var pngUrl = URL.createObjectURL(pngBlob);
+						var downloadLink = document.createElement("a");
+						downloadLink.href = pngUrl;
+						do {
+							var fileName = prompt("PNG File Name", "enter here");
+							if (fileName.indexOf('.png') == -1) {
+								fileName = fileName + '.png';
+							}
+						} while (fileName.length > 255 || fileName.length <= 0);
+						downloadLink.download = fileName;
+						document.body.appendChild(downloadLink);
+						downloadLink.click();
+						document.body.removeChild(downloadLink);
+						overlayInput.checked = true;
+						toggleOverlay(editor);
 
-						saveSvgAsPng(SVGCode, "diagram.png");
 						// new mxXmlRequest(editor.urlImage, 'filename=' + name + '&format=' + format +
 		        // 			bg + '&w=' + w + '&h=' + h + '&xml=' + encodeURIComponent(xml)).
 		        // 			simulate(document, '_blank');
@@ -569,8 +594,8 @@
 					// !!!DONE!!! add overlay toggle
 					// refactor connections
 					// add vertical elements editing
-					// image saving
-					// xml saving
+					// !!!DONE!!! image saving
+					// !!!DONE!!! xml saving
 					// ebnf saving
 					// redo gui
 					// !!!DONE!!! rectangle width based on text width
