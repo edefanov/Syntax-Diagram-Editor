@@ -122,13 +122,74 @@
 				editor.execute('switchView');
 			});
 
+			// draw/hide Overlays
+
+			var overlayInput = document.getElementById('overlayToggle');
+			overlayInput.checked = true;
+
+			var toggleOverlay = function(editor)
+			{
+				if (overlayInput.checked)
+				{
+					var parent = editor.graph.getDefaultParent();
+					var cellList = editor.graph.model.getChildCount(parent);
+					if (cellList > 0) {
+						// going through containers
+						var containerList = editor.graph.getChildCells(parent);
+						console.log(containerList)
+						for (var i = 0; i < cellList; i++) {
+							// going through object inside container
+							var childList = editor.graph.model.getChildCount(containerList[i])
+							var childCells = editor.graph.getChildCells(containerList[i])
+							console.log('childcells', childCells);
+							for (var z = 0; z < childList; z++) {
+								if (editor.graph.getCellOverlays(childCells[z]) != null) {
+									var cOverlay = editor.graph.getCellOverlays(childCells[z])[0];
+									cOverlay.image = new mxImage('images/add.png', 28, 28);
+								}
+							}
+						}
+					}
+				editor.graph.refresh();
+				} else {
+					var parent = editor.graph.getDefaultParent();
+					var cellList = editor.graph.model.getChildCount(parent);
+					if (cellList > 0) {
+						// going through containers
+						var containerList = editor.graph.getChildCells(parent);
+						console.log(containerList)
+						for (var i = 0; i < cellList; i++) {
+							// going through object inside container
+							var childList = editor.graph.model.getChildCount(containerList[i])
+							var childCells = editor.graph.getChildCells(containerList[i])
+							console.log('childcells', childCells);
+							for (var z = 0; z < childList; z++) {
+								if (editor.graph.getCellOverlays(childCells[z]) != null) {
+									var cOverlay = editor.graph.getCellOverlays(childCells[z])[0];
+									cOverlay.image = new mxImage('images/add.png', 0, 0);
+								}
+							}
+						}
+					}
+				editor.graph.refresh();
+			}};
+
+			editor.addAction('toggleOverlay', toggleOverlay);
+
+			// Defines a new action to switch between
+			// XML and graphical display
+			mxEvent.addListener(overlayInput, 'click', function()
+			{
+				editor.execute('toggleOverlay');
+			});
+
 			// Create select actions in page
 			var node = document.getElementById('mainActions');
 			var buttons = ['group', 'ungroup', 'cut', 'copy', 'paste', 'delete', 'undo', 'redo', 'print', 'show'];
 
 			// Only adds image and SVG export if backend is available
 			// NOTE: The old image export in mxEditor is not used, the urlImage is used for the new export.
-			if (editor.urlImage != null)
+			if (editor.urlImage == null)
 			{
 				// Client-side code for image export
 				var exportImage = function(editor)
@@ -351,8 +412,12 @@
 
 					// adding overlays - add button
 
-					var overlay = new mxCellOverlay(new mxImage('images/add.png', 28, 28), 'Add New Element');
-					overlay.offset.x = secondEllipseGeo.x - firstEllipseGeo.x;
+					if (overlayInput.checked) {
+						var overlay = new mxCellOverlay(new mxImage('images/add.png', 28, 28), 'Add New Element');
+					} else {
+						var overlay = new mxCellOverlay(new mxImage('images/add.png', 0, 0), 'Add New Element');
+					}
+					//overlay.offset.x = secondEllipseGeo.x - firstEllipseGeo.x;
 					console.log('secondEllipseGeo.x = ', secondEllipseGeo.x, ' firstEllipseGeo.x = ', firstEllipseGeo.x, ' overlay offset x = ', overlay.offset.x);
 					overlay.cursor = 'hand';
 					editor.graph.addCellOverlay(ellipseEdge, overlay);
@@ -466,13 +531,13 @@
 
 					// @todo:
 					// re-align non-terminals
-					// add overlay toggle
+					// !!!DONE!!! add overlay toggle
 					// refactor connections
 					// add vertical elements editing
 					// image saving
 					// ebnf saving
 					// redo gui
-					// rectangle width based on text width
+					// !!!DONE!!! rectangle width based on text width
 					editor.graph.refresh();
 			}
 		})
@@ -507,6 +572,9 @@
 		</table>
 		<span style="float:right;padding-right:36px;">
 			<input id="source" type="checkbox"/>Source
+		</span>
+		<span style="float:right;padding-right:12px;">
+			<input id="overlayToggle" type="checkbox"/>Controls
 		</span>
 		<div id="zoomActions" style="width:100%;padding-left:54px;padding-top:4px;">
 		</div>
