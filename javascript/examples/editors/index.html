@@ -11,6 +11,7 @@
 	</script>
 	<script type="text/javascript" src="../../src/js/mxClient.js"></script>
 	<script type="text/javascript" src="js/app.js"></script>
+	<script type="text/javascript" src="js/saveSvgAsPng.js"></script>
 	<script type="text/javascript">
 		// Program starts here. The document.onLoad executes the
 		// createEditor function with a given configuration.
@@ -223,9 +224,17 @@
 						var format = 'png';
 						var bg = '&bg=#FFFFFF';
 
-						new mxXmlRequest(editor.urlImage, 'filename=' + name + '&format=' + format +
-		        			bg + '&w=' + w + '&h=' + h + '&xml=' + encodeURIComponent(xml)).
-		        			simulate(document, '_blank');
+						var documentGraph = mxUtils.show(editor.graph, 'new', 10, 10);
+						var svg1 = new XMLSerializer().serializeToString(documentGraph);
+						var SVGCode = svg1.substring(
+    					svg1.indexOf("<svg"),
+					    svg1.indexOf("</svg>")+6
+						);
+
+						saveSvgAsPng(SVGCode, "diagram.png");
+						// new mxXmlRequest(editor.urlImage, 'filename=' + name + '&format=' + format +
+		        // 			bg + '&w=' + w + '&h=' + h + '&xml=' + encodeURIComponent(xml)).
+		        // 			simulate(document, '_blank');
 					}
 				};
 
@@ -234,6 +243,8 @@
 				// Client-side code for SVG export
 				var exportSvg = function(editor)
 				{
+					overlayInput.checked = false;
+					toggleOverlay(editor);
 					var graph = editor.graph;
 					var scale = graph.view.scale;
 					var bounds = graph.getGraphBounds();
@@ -277,10 +288,32 @@
 				    var imgExport = new mxImageExport();
 				    imgExport.drawState(graph.getView().getState(graph.model.root), svgCanvas);
 
-					var name = 'export.svg';
-				    var xml = encodeURIComponent(mxUtils.getXml(root));
+						var documentGraph = mxUtils.show(editor.graph, 'new', 10, 10);
+						var svg1 = new XMLSerializer().serializeToString(documentGraph);
+						var SVGCode = svg1.substring(
+    					svg1.indexOf("<svg"),
+					    svg1.indexOf("</svg>")+6
+						);
+						var svgBlob = new Blob([SVGCode], {type:"image/svg+xml;charset=utf-8"});
+						var svgUrl = URL.createObjectURL(svgBlob);
+						var downloadLink = document.createElement("a");
+						downloadLink.href = svgUrl;
+						do {
+							var fileName = prompt("SVG File Name", "enter here");
+							if (fileName.indexOf('.svg') == -1) {
+								fileName = fileName + '.svg';
+							}
+						} while (fileName.length > 255 || fileName.length <= 0);
+						downloadLink.download = fileName;
+						document.body.appendChild(downloadLink);
+						downloadLink.click();
+						document.body.removeChild(downloadLink);
+						overlayInput.checked = true;
+						toggleOverlay(editor);
 
-					new mxXmlRequest(editor.urlEcho, 'filename=' + name + '&format=svg' + '&xml=' + xml).simulate(document, "_blank");
+
+
+					//new mxXmlRequest(editor.urlEcho, 'filename=' + name + '&format=svg' + '&xml=' + xml).simulate(document, "_blank");
 				};
 
 				editor.addAction('exportSvg', exportSvg);
@@ -288,6 +321,7 @@
 				buttons.push('exportImage');
 				buttons.push('exportSvg');
 			};
+
 
 			for (var i = 0; i < buttons.length; i++)
 			{
@@ -529,12 +563,14 @@
 				    return metrics.width;
 					}
 
+
 					// @todo:
 					// re-align non-terminals
 					// !!!DONE!!! add overlay toggle
 					// refactor connections
 					// add vertical elements editing
 					// image saving
+					// xml saving
 					// ebnf saving
 					// redo gui
 					// !!!DONE!!! rectangle width based on text width
