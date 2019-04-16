@@ -108,7 +108,7 @@
 					}
 
 					textNode.style.display = 'none';
-
+					editor.execute('actualSize');
 					// Moves the focus back to the graph
 					editor.graph.container.focus();
 				}
@@ -133,20 +133,24 @@
 				if (overlayInput.checked)
 				{
 					var parent = editor.graph.getDefaultParent();
-					var cellList = editor.graph.model.getChildCount(parent);
-					if (cellList > 0) {
+					var containerList = editor.graph.getChildCells(parent);
+					if (containerList.length > 0) {
 						// going through containers
-						var containerList = editor.graph.getChildCells(parent);
-						console.log(containerList)
-						for (var i = 0; i < cellList; i++) {
-							// going through object inside container
-							var childList = editor.graph.model.getChildCount(containerList[i])
-							var childCells = editor.graph.getChildCells(containerList[i])
-							console.log('childcells', childCells);
-							for (var z = 0; z < childList; z++) {
-								if (editor.graph.getCellOverlays(childCells[z]) != null) {
-									var cOverlay = editor.graph.getCellOverlays(childCells[z])[0];
-									cOverlay.image = new mxImage('images/add.png', 28, 28);
+						for (var i = 0; i < containerList.length; i++) {
+							// going through edges inside container
+							var childCells = editor.graph.getChildEdges(containerList[i])
+							for (var z = 0; z < childCells.length; z++) {
+									if (editor.graph.getCellOverlays(childCells[z]) != null) {
+										var cOverlay = editor.graph.getCellOverlays(childCells[z])[0];
+										cOverlay.image = new mxImage('images/add.png', 28, 28);
+									}
+							}
+							// getting the big vertical overlays
+							var childCells = containerList[i].children;
+							for (var z = 0; z < childCells.length; z++) {
+								var cellStyle = childCells[z].style
+								if (cellStyle == 'image;image=images/add.png;editable=0;movable=0;selectable=0;resizable=0') {
+									childCells[z].visible = true;
 								}
 							}
 						}
@@ -158,16 +162,21 @@
 					if (cellList > 0) {
 						// going through containers
 						var containerList = editor.graph.getChildCells(parent);
-						console.log(containerList)
 						for (var i = 0; i < cellList; i++) {
 							// going through object inside container
-							var childList = editor.graph.model.getChildCount(containerList[i])
-							var childCells = editor.graph.getChildCells(containerList[i])
-							console.log('childcells', childCells);
-							for (var z = 0; z < childList; z++) {
+							var childCells = editor.graph.getChildEdges(containerList[i])
+							for (var z = 0; z < childCells.length; z++) {
 								if (editor.graph.getCellOverlays(childCells[z]) != null) {
 									var cOverlay = editor.graph.getCellOverlays(childCells[z])[0];
 									cOverlay.image = new mxImage('images/add.png', 0, 0);
+								}
+							}
+							// getting the big vertical overlays
+							var childCells = containerList[i].children;
+							for (var z = 0; z < childCells.length; z++) {
+								var cellStyle = childCells[z].style
+								if (cellStyle == 'image;image=images/add.png;editable=0;movable=0;selectable=0;resizable=0') {
+									childCells[z].visible = false;
 								}
 							}
 						}
@@ -380,6 +389,8 @@
 
 			// add new container toolbar button action
 			editor.addAction('addNewContainer', function(editor, cell){
+				//editor.graph.setCellsSelectable(false);
+				//editor.graph.setCellsMovable(false);
 				var label = prompt("Syntax Unit Name", "name");
 				if (label != null) {
 					var i = 0;
@@ -469,6 +480,46 @@
 					var edgeClone = editor.graph.model.cloneCell(edgeTemplate);
 					var ellipseEdge = editor.graph.addEdge(edgeClone, newContainer, firstEllipse, secondEllipse);
 
+					// adding overlay for vertical expansion
+
+					var vert = editor.graph.insertVertex(newContainer, '0-add', '', (cloneGeo.width/2-25), firstEllipseGeo.y+25, 50, 50, 'image;image=images/add.png;editable=0;movable=0;selectable=0;resizable=0');
+
+
+					// disabling/enabling the visibility of the control depending on the checkbox
+
+					if (overlayInput.checked) {
+						vert.visible = true;
+					} else {
+						vert.visible = false;
+					}
+
+					editor.graph.addMouseListener(
+			 		{
+					 currentState: null,
+					 mouseDown: function(sender, me)
+					 {
+						 if (this.currentState != null) {
+							 this.dragLeave(me.getEvent(), this.currentState)
+						 }
+						 if (editor.graph.model.isVertex(me.getCell()))
+						 {
+							 	var cellPointer = me.getCell();
+								if (cellPointer.style == 'image;image=images/add.png;editable=0;movable=0;selectable=0;resizable=0') {
+
+								}
+						 }
+					 },
+					 mouseMove: function(sender, me)
+					 {},
+					 mouseUp: function(sender, me)
+					 {
+					 },
+					 dragEnter: function(evt, state)
+					 {},
+					 dragLeave: function(evt, state)
+					 {}
+				 });
+
 					// adding overlays - add button
 
 					if (overlayInput.checked) {
@@ -476,7 +527,6 @@
 					} else {
 						var overlay = new mxCellOverlay(new mxImage('images/add.png', 0, 0), 'Add New Element');
 					}
-					//overlay.offset.x = secondEllipseGeo.x - firstEllipseGeo.x;
 					console.log('secondEllipseGeo.x = ', secondEllipseGeo.x, ' firstEllipseGeo.x = ', firstEllipseGeo.x, ' overlay offset x = ', overlay.offset.x);
 					overlay.cursor = 'hand';
 					editor.graph.addCellOverlay(ellipseEdge, overlay);
@@ -551,15 +601,15 @@
 										}
 							}
 							var containerGeo = editor.graph.getCellGeometry(newContainer).clone();
-							var containerGeoPrev = containerGeo
 							containerGeo.width = farRightX1 + 55;
-							console.log('stringRectangleGeo.x = ', stringRectangleGeo.x);
-							console.log('farRightX = ', farRightX);
 							secondEllipseGeo.x = containerGeo.width-10;
 							editor.graph.model.setGeometry(secondEllipse, secondEllipseGeo);
 							editor.graph.model.setGeometry(newContainer, containerGeo);
-							console.log('containerWidth', containerGeo.width)
-							//overlay.offset.x = containerGeo.width + 20;
+
+							// moving the vertical expansion overlay to container/2
+							var vertGeo = editor.graph.getCellGeometry(vert).clone();
+							vertGeo.x = Math.round(containerGeo.width / 2) - vertGeo.width/2;
+							editor.graph.model.setGeometry(vert, vertGeo);
 						}
 
 					});
