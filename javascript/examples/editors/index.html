@@ -513,13 +513,15 @@
 									var cells = editor.graph.getChildCells(newContainer);
 									var size = 0
 									var labels = []
+									var cellz = []
 									console.log(cells);
 									for (var i=0; i < cells.length; i++)
 									{
 										if (cells[i].value.tagName == 'Rect' || cells[i].value.tagName == 'Roundrect')
 										{
-											size++;
+											cellz.unshift(cells[i])
 											labels.unshift(editor.graph.getLabel(cells[i]));
+											size++;
 										}
 									}
 									console.log('size = ', size, 'labels = ', labels);
@@ -529,16 +531,16 @@
 									{
 										for (i = 0; i < labels.length; i++)
 										{
-											htmlList += `<option value="${labels[i]}"> ${labels[i]} </option>`
+											htmlList += `<option value="${i}"> ${labels[i]} </option>`
 										}
-										html = `<select size="${size}">${htmlList} </select> <br> <button id='closeBtn' style='align:right'>Cancel</button>`
+										html = `<table id="tab"><tr><td><select id='selection1' size="${size}">${htmlList} </select></td><td><select id='selection2' size="${size}">${htmlList}</td></tr><tr><td align='right'><button id='submitBtn' style='align:right'>Select</button></td><td> <button id='closeBtn' style='align:right'>Cancel</button></td></table>`
 									} else
 									{
 										html = `<span> No nodes in the graph <span> <br> <button id='closeBtn' style='align:right'>Close</button> `
 									}
 									var tb = document.createElement('div');
 									tb.innerHTML = html;
-									var wnd = new mxWindow('Connection Select', tb, containerGeo.width + 25, containerGeo.y, 200, 200, false, true);
+									var wnd = new mxWindow('Connection Select', tb, (document.getElementById('graph').getBoundingClientRect().left + containerGeo.width + 25), document.getElementById('graph').getBoundingClientRect().top, 200, 200, false, true);
 									wnd.setLocation = function(x, y)
 									{
 									  x = Math.max(0, x);
@@ -549,6 +551,57 @@
 									{
 										wnd.destroy();
 									};
+									if (labels.length > 0)
+									{
+										document.getElementById('submitBtn').onclick = function()
+										{
+											var e = document.getElementById('selection1');
+											var lsIndex = e.value;
+											e = document.getElementById('selection2');
+											var rsIndex = e.value;
+											wnd.destroy();
+											if (lsIndex == 0)
+											{
+												// if left vertex is leftmost set the first terminal point from the middle of the line
+												var cellE = new mxCell('edge', new mxGeometry(0, 0, 50, 50), 'curved=1;endArrow=classic;html=1;');
+												var lsCGeo = cellz[lsIndex].getGeometry();
+												cellE.geometry.setTerminalPoint(new mxPoint(((lsCGeo.x - firstEllipseGeo.x) / 2), firstEllipseGeo.y + firstEllipseGeo.height / 2), true);
+												cellE.geometry.setTerminalPoint(new mxPoint(lsCGeo.x, firstEllipseGeo.y + 35), false);
+												cellE.edge = true;
+												cellE = editor.graph.addCell(cellE, ellipseEdge);
+												editor.graph.fireEvent(new mxEventObject('cellsInserted', 'cells', [cell]));
+											} else {
+												// if not set the first terminal point from the middle of the line between the two vertices
+												var cellE = new mxCell('edge', new mxGeometry(0, 0, 50, 50), 'curved=1;endArrow=classic;html=1;');
+												var lsCGeo = cellz[lsIndex].getGeometry();
+												var lsCGeoP = cellz[lsIndex-1].getGeometry();
+												console.log(cellz[lsIndex]);
+												cellE.geometry.setTerminalPoint(new mxPoint((lsCGeoP.x+lsCGeoP.width + ((lsCGeo.x-lsCGeoP.x-lsCGeoP.width)/2)), firstEllipseGeo.y + firstEllipseGeo.height / 2), true);
+												cellE.geometry.setTerminalPoint(new mxPoint(lsCGeo.x, firstEllipseGeo.y + 35), false);
+												cellE.edge = true;
+												cellE = editor.graph.addCell(cellE, ellipseEdge);
+												editor.graph.fireEvent(new mxEventObject('cellsInserted', 'cells', [cellE]));
+											}
+											if (rsIndex == cellz.length-1)
+											{
+												// if right vertex is rightmost set the second terminal point from the middle of the line
+												var cellE2 = new mxCell('edge', new mxGeometry(0, 0, 50, 50), 'curved=1;endArrow=classic;html=1;');
+												var lsCGeo2 = cellz[rsIndex].getGeometry();
+												cellE2.geometry.setTerminalPoint(new mxPoint(lsCGeo2.x+lsCGeo2.width, firstEllipseGeo.y + 35), true);
+												cellE2.geometry.setTerminalPoint(new mxPoint(lsCGeo2.x + lsCGeo2.width + (secondEllipseGeo.x-lsCGeo2.x-lsCGeo2.width)/2, firstEllipseGeo.y + firstEllipseGeo.height / 2), false);
+												cellE2.edge = true;
+												cellE2 = editor.graph.addCell(cellE2, ellipseEdge);
+												editor.graph.fireEvent(new mxEventObject('cellsInserted', 'cells', [cellE2]));
+											}
+											// connecting edge between 2 edges
+											var cellE3 = new mxCell('edge', new mxGeometry(0, 0, 50, 50), 'curved=1;endArrow=classic;html=1;');
+											cellE3.geometry.setTerminalPoint(new mxPoint(lsCGeo.x, firstEllipseGeo.y + 35), true);
+											cellE3.geometry.setTerminalPoint(new mxPoint(lsCGeo2.x+lsCGeo2.width, firstEllipseGeo.y + 35), false);
+											cellE3.edge = true;
+											cellE3 = editor.graph.addCell(cellE3, ellipseEdge);
+											editor.graph.fireEvent(new mxEventObject('cellsInserted', 'cells', [cellE3]));
+										};
+									}
 									wnd.setVisible(true);
 								}
 						 }
