@@ -482,7 +482,7 @@
 
 					// adding overlay for vertical expansion
 
-					var vert = editor.graph.insertVertex(newContainer, '0-add', '', (cloneGeo.width/2-25), firstEllipseGeo.y+25, 50, 50, 'image;image=images/add.png;editable=0;movable=0;selectable=0;resizable=0');
+					var vert = editor.graph.insertVertex(newContainer, '0-add', '', (cloneGeo.width/2-25), firstEllipseGeo.y+25, 35, 35, 'image;image=images/add.png;editable=0;movable=0;selectable=0;resizable=0');
 
 
 					// disabling/enabling the visibility of the control depending on the checkbox
@@ -494,6 +494,7 @@
 					}
 
 
+					// add vertical elements cell overlay event
 					editor.graph.addMouseListener(
 			 		{
 					 currentState: null,
@@ -565,19 +566,20 @@
 												// if left vertex is leftmost set the first terminal point from the middle of the line
 												var cellE = new mxCell('edge', new mxGeometry(0, 0, 50, 50), 'curved=1;endArrow=classic;html=1;');
 												var lsCGeo = cellz[lsIndex].getGeometry();
-												cellE.geometry.setTerminalPoint(new mxPoint(((lsCGeo.x - firstEllipseGeo.x) / 2), firstEllipseGeo.y + firstEllipseGeo.height / 2), true);
-												cellE.geometry.setTerminalPoint(new mxPoint(lsCGeo.x, firstEllipseGeo.y + 35), false);
+												cellE.geometry.setTerminalPoint(new mxPoint(((lsCGeo.x - firstEllipseGeo.x) / 2), firstEllipseGeo.y + firstEllipseGeo.height/2), true);
+												cellE.geometry.setTerminalPoint(new mxPoint(lsCGeo.x, firstEllipseGeo.y + 50), false);
 												cellE.edge = true;
 												cellE = editor.graph.addCell(cellE, ellipseEdge);
-												editor.graph.fireEvent(new mxEventObject('cellsInserted', 'cells', [cell]));
+												editor.graph.fireEvent(new mxEventObject('cellsInserted', 'cells', [cellE]));
 											} else {
 												// if not set the first terminal point from the middle of the line between the two vertices
 												var cellE = new mxCell('edge', new mxGeometry(0, 0, 50, 50), 'curved=1;endArrow=classic;html=1;');
 												var lsCGeo = cellz[lsIndex].getGeometry();
 												var lsCGeoP = cellz[lsIndex-1].getGeometry();
 												console.log(cellz[lsIndex]);
-												cellE.geometry.setTerminalPoint(new mxPoint((lsCGeoP.x+lsCGeoP.width + ((lsCGeo.x-lsCGeoP.x-lsCGeoP.width)/2)), firstEllipseGeo.y + firstEllipseGeo.height / 2), true);
-												cellE.geometry.setTerminalPoint(new mxPoint(lsCGeo.x, firstEllipseGeo.y + 35), false);
+												console.log('lsindex-1 =', lsIndex-1);
+												cellE.geometry.setTerminalPoint(new mxPoint((lsCGeoP.x+lsCGeoP.width + ((lsCGeo.x-lsCGeoP.x-lsCGeoP.width)/2)), firstEllipseGeo.y + firstEllipseGeo.height/2), true);
+												cellE.geometry.setTerminalPoint(new mxPoint(lsCGeo.x, firstEllipseGeo.y + 50), false);
 												cellE.edge = true;
 												cellE = editor.graph.addCell(cellE, ellipseEdge);
 												editor.graph.fireEvent(new mxEventObject('cellsInserted', 'cells', [cellE]));
@@ -587,19 +589,33 @@
 												// if right vertex is rightmost set the second terminal point from the middle of the line
 												var cellE2 = new mxCell('edge', new mxGeometry(0, 0, 50, 50), 'curved=1;endArrow=classic;html=1;');
 												var lsCGeo2 = cellz[rsIndex].getGeometry();
-												cellE2.geometry.setTerminalPoint(new mxPoint(lsCGeo2.x+lsCGeo2.width, firstEllipseGeo.y + 35), true);
-												cellE2.geometry.setTerminalPoint(new mxPoint(lsCGeo2.x + lsCGeo2.width + (secondEllipseGeo.x-lsCGeo2.x-lsCGeo2.width)/2, firstEllipseGeo.y + firstEllipseGeo.height / 2), false);
+												cellE2.geometry.setTerminalPoint(new mxPoint(lsCGeo2.x+lsCGeo2.width, firstEllipseGeo.y + 50), true);
+												cellE2.geometry.setTerminalPoint(new mxPoint(lsCGeo2.x + lsCGeo2.width + (secondEllipseGeo.x-lsCGeo2.x-lsCGeo2.width)/2, firstEllipseGeo.y + firstEllipseGeo.height/2), false);
 												cellE2.edge = true;
+												cellE2 = editor.graph.addCell(cellE2, ellipseEdge);
+												editor.graph.fireEvent(new mxEventObject('cellsInserted', 'cells', [cellE2]));
+											} else {
+												// if right vertex is not rightmost set the second terminal point between two vertices
+												var cellE2 = new mxCell('edge', new mxGeometry(0, 0, 50, 50), 'curved=1;endArrow=classic;html=1;');
+												var lsCGeo2 = cellz[rsIndex].getGeometry();
+												var lsCGeoP2 = cellz[rsIndex-(-1)].getGeometry();
+												cellE2.geometry.setTerminalPoint(new mxPoint(lsCGeo2.x+lsCGeo2.width, firstEllipseGeo.y + 50), true);
+												cellE2.geometry.setTerminalPoint(new mxPoint((lsCGeo2.x+lsCGeo2.width + ((lsCGeoP2.x-lsCGeo2.width-lsCGeo2.x)/2)), firstEllipseGeo.y + firstEllipseGeo.height/2), false);
+												cellE2.edge = true;
+												console.log(cellE2.geometry);
 												cellE2 = editor.graph.addCell(cellE2, ellipseEdge);
 												editor.graph.fireEvent(new mxEventObject('cellsInserted', 'cells', [cellE2]));
 											}
 											// connecting edge between 2 edges
 											var cellE3 = new mxCell('edge', new mxGeometry(0, 0, 50, 50), 'curved=1;endArrow=classic;html=1;');
-											cellE3.geometry.setTerminalPoint(new mxPoint(lsCGeo.x, firstEllipseGeo.y + 35), true);
-											cellE3.geometry.setTerminalPoint(new mxPoint(lsCGeo2.x+lsCGeo2.width, firstEllipseGeo.y + 35), false);
+											cellE3.geometry.setTerminalPoint(new mxPoint(lsCGeo.x, firstEllipseGeo.y + 50), true);
+											cellE3.geometry.setTerminalPoint(new mxPoint(lsCGeo2.x+lsCGeo2.width, firstEllipseGeo.y + 50), false);
 											cellE3.edge = true;
 											cellE3 = editor.graph.addCell(cellE3, ellipseEdge);
 											editor.graph.fireEvent(new mxEventObject('cellsInserted', 'cells', [cellE3]));
+											vertGeo = editor.graph.getCellGeometry(vert).clone();
+											vertGeo.y += 50;
+											editor.graph.model.setGeometry(vert, vertGeo);
 										};
 									}
 									wnd.setVisible(true);
