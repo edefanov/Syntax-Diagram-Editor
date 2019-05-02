@@ -613,6 +613,11 @@
 											vertGeo = editor.graph.getCellGeometry(vert).clone();
 											vertGeo.y += 50;
 											editor.graph.model.setGeometry(vert, vertGeo);
+											// resizing the container
+											var containerGeo = editor.graph.getCellGeometry(newContainer).clone();
+											containerGeo.height += 50;
+											editor.graph.model.setGeometry(newContainer, containerGeo);
+											// variables to use later to determine where to place new cells
 											var cellE3G = cellE3.geometry;
 											var cellEG = cellE.geometry;
 											var cellE2G = cellE2.geometry;
@@ -656,9 +661,9 @@
 													// высота отличается на число, кратное 50
 													// надо вычислить ширину элемента после добавления и сравнить с шириной линии выше
 													//
+													var elemLine = new Array();
 													var containerChildren = editor.graph.model.getChildren(newContainer);
 													var farRightX = cellEG.targetPoint.x;
-													var lineAboveHeight = 0;
 													for (i = 0; i < containerChildren.length; i++) {
 														var cellType = containerChildren[i].getValue();
 														if (cellType.tagName == 'Rect' || cellType.tagName == 'Roundrect') {
@@ -666,6 +671,7 @@
 																if (geoCompare.x > farRightX && geoCompare.y == (cellE3G.sourcePoint.y-10) && geoCompare.x < cellE2G.sourcePoint.x) {
 																	farRightX = geoCompare.x + geoCompare.width/2;
 																	var geoCompareF = geoCompare;
+																	elemLine.push(containerChildren[i]);
 																}
 														}
 													}
@@ -675,10 +681,34 @@
 													var stringRectangleGeo = editor.graph.getCellGeometry(stringRectangle).clone();
 													stringRectangleGeo.height = 20;
 													stringRectangleGeo.y = cellE3G.sourcePoint.y-10;
-													if (typeof geoCompareF != "undefined"){
-														stringRectangleGeo.x = farRightX + geoCompareF.width;
+													if (typeof geoCompareF != "undefined") {
+														// if there are cells on this Y level
+														// add up widths of the elements
+														var lengthSum = 0;
+														elemLine.push(stringRectangle);
+														for (i=0; i < elemLine.length; i++)
+														{
+															lengthSum += elemLine[i].getGeometry().width + 20
+														}
+														// compare it to to the width of the line
+														if (lengthSum > (cellE3G.targetPoint.x - cellE3G.sourcePoint.x))
+														{
+															// have to extend the line and the parent line, possibly  adjust the other lines as well
+
+														} else {
+															// dont have to extend the line, just move the cells
+															var lineLength = Math.abs(cellE3G.targetPoint.x - cellE3G.sourcePoint.x);
+															if (cellE3G.targetPoint.x > cellE3G.sourcePoint.x)
+															{
+																cellE3G.sourcePoint.x + 10
+															} else {
+
+															}
+														}
+														//stringRectangleGeo.x = farRightX + geoCompareF.width;
 													} else {
-														stringRectangleGeo.x = (cellE2G.sourcePoint.x - cellEG.sourcePoint.x) / 2 + cellE2G.sourcePoint;
+														// if there are no cells on this Y level put the cell in the middle
+														stringRectangleGeo.x = (cellE2G.sourcePoint.x - cellEG.sourcePoint.x) / 2 + cellEG.sourcePoint.x - stringRectangleGeo.width/2;
 													}
 													editor.graph.model.setGeometry(stringRectangle, stringRectangleGeo);
 
@@ -692,16 +722,6 @@
 																	farRightX1 = geoCompare1.x + geoCompare1.width;
 																}
 													}
-													var containerGeo = editor.graph.getCellGeometry(newContainer).clone();
-													//containerGeo.width = farRightX1 + 55;
-													//secondEllipseGeo.x = containerGeo.width-10;
-													//editor.graph.model.setGeometry(secondEllipse, secondEllipseGeo);
-													//editor.graph.model.setGeometry(newContainer, containerGeo);
-
-													// moving the vertical expansion overlay to container/2
-													// var vertGeo = editor.graph.getCellGeometry(vert).clone();
-													// vertGeo.x = Math.round(containerGeo.width / 2) - vertGeo.width/2;
-													// editor.graph.model.setGeometry(vert, vertGeo);
 												}
 
 											});
