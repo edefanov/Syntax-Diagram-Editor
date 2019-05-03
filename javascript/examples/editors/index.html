@@ -195,7 +195,7 @@
 
 			// Create select actions in page
 			var node = document.getElementById('mainActions');
-			var buttons = ['group', 'ungroup', 'cut', 'copy', 'paste', 'delete', 'undo', 'redo', 'print', 'show', 'save'];
+			var buttons = ['cut', 'copy', 'paste', 'delete', 'undo', 'redo', 'print', 'show', 'save'];
 
 			// Only adds image and SVG export if backend is available
 			// NOTE: The old image export in mxEditor is not used, the urlImage is used for the new export.
@@ -658,21 +658,25 @@
 													editor.graph.model.setGeometry(stringClone, contGeo);
 
 													// searching for far right cell x coordinate
-													// высота отличается на число, кратное 50
-													// надо вычислить ширину элемента после добавления и сравнить с шириной линии выше
-													//
 													var elemLine = new Array();
 													var containerChildren = editor.graph.model.getChildren(newContainer);
+													console.log(containerChildren);
 													var farRightX = cellEG.targetPoint.x;
-													for (i = 0; i < containerChildren.length; i++) {
+													for (i = 0; i < containerChildren.length; i++)
+													{
 														var cellType = containerChildren[i].getValue();
-														if (cellType.tagName == 'Rect' || cellType.tagName == 'Roundrect') {
+														if (cellType.tagName == 'Rect' || cellType.tagName == 'Roundrect')
+														{
 															var geoCompare = containerChildren[i].getGeometry();
-																if (geoCompare.x > farRightX && geoCompare.y == (cellE3G.sourcePoint.y-10) && geoCompare.x < cellE2G.sourcePoint.x) {
-																	farRightX = geoCompare.x + geoCompare.width/2;
-																	var geoCompareF = geoCompare;
+															if (geoCompare.x >= cellEG.targetPoint.x && geoCompare.y == (cellE3G.sourcePoint.y-10) && geoCompare.x <= cellE2G.sourcePoint.x)
+															{
+																	if ((geoCompare.x + geoCompare.width) >= farRightX)
+																	{
+																		farRightX = geoCompare.x + geoCompare.width;
+																		var geoCompareF = geoCompare;
+																	}
 																	elemLine.push(containerChildren[i]);
-																}
+															}
 														}
 													}
 
@@ -685,30 +689,41 @@
 														// if there are cells on this Y level
 														// add up widths of the elements
 														var lengthSum = 0;
-														elemLine.push(stringRectangle);
 														for (i=0; i < elemLine.length; i++)
 														{
-															lengthSum += elemLine[i].getGeometry().width + 20
+															lengthSum += elemLine[i].getGeometry().width + 40;
 														}
+														lengthSum += stringRectangleGeo.width;
 														// compare it to to the width of the line
-														if (lengthSum > (cellE3G.targetPoint.x - cellE3G.sourcePoint.x))
+														if (lengthSum > Math.abs(cellE3G.targetPoint.x - cellE3G.sourcePoint.x))
 														{
 															// have to extend the line and the parent line, possibly  adjust the other lines as well
-
-														} else {
-															// dont have to extend the line, just move the cells
-															var lineLength = Math.abs(cellE3G.targetPoint.x - cellE3G.sourcePoint.x);
-															if (cellE3G.targetPoint.x > cellE3G.sourcePoint.x)
+															for (i=0; i<containerChildren.length; i++)
 															{
-																cellE3G.sourcePoint.x + 10
-															} else {
-
+																// if rectangle move to the right
+																var cellType = containerChildren[i].getValue();
+																if (cellType.tagName == 'Rect' || cellType.tagName == 'Roundrect')
+																{
+																	if (containerChildren[i].geometry.x > cellE3G.)
+																	{
+																		
+																	}
+																}
 															}
+															console.log('need to move shit');
+														} else {
+															// dont have to extend the line, just add to the right
+															stringRectangleGeo.x = farRightX + 40;
 														}
-														//stringRectangleGeo.x = farRightX + geoCompareF.width;
 													} else {
-														// if there are no cells on this Y level put the cell in the middle
-														stringRectangleGeo.x = (cellE2G.sourcePoint.x - cellEG.sourcePoint.x) / 2 + cellEG.sourcePoint.x - stringRectangleGeo.width/2;
+														// if there are no cells on this Y level put the cell on the leftmost point
+														// stringRectangleGeo.x = (cellE2G.sourcePoint.x - cellEG.sourcePoint.x) / 2 + cellEG.sourcePoint.x - stringRectangleGeo.width/2;
+														if (cellE3G.targetPoint.x > cellE3G.sourcePoint.x)
+														{
+															stringRectangleGeo.x = cellE3G.sourcePoint.x;
+														} else {
+															stringRectangleGeo.x = cellE3G.targetPoint.x;
+														}
 													}
 													editor.graph.model.setGeometry(stringRectangle, stringRectangleGeo);
 
@@ -734,8 +749,7 @@
 					 mouseMove: function(sender, me)
 					 {},
 					 mouseUp: function(sender, me)
-					 {
-					 },
+					 {},
 					 dragEnter: function(evt, state)
 					 {},
 					 dragLeave: function(evt, state)
@@ -779,10 +793,6 @@
 							contGeo.width = Math.round(getTextWidth(labelNewString, '11px arial')) + 30;
 							editor.graph.model.setGeometry(stringClone, contGeo);
 
-
-							console.log(' ')
-							console.log(' ')
-
 							// searching for far right cell x coordinate
 							var containerChildren = editor.graph.model.getChildren(newContainer);
 							var farRightX = 0;
@@ -790,7 +800,7 @@
 								var cellType = containerChildren[i].getValue();
 								if (cellType.tagName == 'Rect' || cellType.tagName == 'Roundrect') {
 									var geoCompare = containerChildren[i].getGeometry();
-									console.log('geoCompare.x = ', geoCompare.x);
+									// console.log('geoCompare.x = ', geoCompare.x);
 										if (geoCompare.x > farRightX ) {
 											farRightX = geoCompare.x + geoCompare.width/2;
 											var geoCompareF = geoCompare;
@@ -802,7 +812,7 @@
 							var stringRectangle = editor.graph.model.add(newContainer, stringClone, index);
 							var stringRectangleGeo = editor.graph.getCellGeometry(stringRectangle).clone();
 							stringRectangleGeo.height = 20;
-							console.log('width, = ', stringRectangleGeo.width);
+							// console.log('width, = ', stringRectangleGeo.width);
 							stringRectangleGeo.y = secondEllipseGeo.y-6;
 							if (typeof geoCompare != "undefined"){
 								stringRectangleGeo.x = farRightX + geoCompareF.width;
