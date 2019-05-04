@@ -45,7 +45,6 @@
 		<separator/>
 		<add as="properties" action="showProperties" icon="images/properties.gif"/>
 		<separator/>
-		<add as="openHref" action="openHref" icon="images/link.gif"/>
 	</mxDefaultPopupMenu>
 	<include name="config/keyhandler-commons.xml"/>
 	<Array as="actions">
