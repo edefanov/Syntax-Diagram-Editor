@@ -550,20 +550,34 @@
 										if (cells[i].value.tagName == 'Rect' || cells[i].value.tagName == 'Roundrect')
 										{
 											cellz.unshift(cells[i])
-											labels.unshift(editor.graph.getLabel(cells[i]));
-											size++;
 										}
 									}
 									console.log('size = ', size, 'labels = ', labels);
 									var htmlList = ''
 									var html = ''
+									cellz.sort(function(a,b)
+									{
+										if (a.geometry.y < b.geometry.y)
+										{
+											return -1
+										}
+										if (a.geometry.y > b.geometry.y)
+										{
+											return 1
+										}
+									})
+									for (i = 0; i< cellz.length; i++)
+									{
+										labels.push(editor.graph.getLabel(cellz[i]));
+										size++;
+									}
 									if (labels.length > 0)
 									{
 										for (i = 0; i < labels.length; i++)
 										{
 											htmlList += `<option value="${i}"> ${labels[i]} </option>`
 										}
-										html = `<table id="tab"><tr><td><select id='selection1' size="${size}">${htmlList} </select></td><td><select id='selection2' size="${size}">${htmlList}</td></tr><tr><td align='right'><button id='submitBtn' style='align:right'>Select</button></td><td> <button id='closeBtn' style='align:right'>Cancel</button></td></table>`
+										html = `<table id="tab"><tr><td><select id='selection1' size="${size}">${htmlList} </select></td><td><select id='selection2' size="${size}">${htmlList}</td></tr><tr><td align='right'> <br> <button id='submitBtn' style='align:right'>Select</button></td><td> <button id='closeBtn' style='align:right'>Cancel</button></td></table>`
 									} else
 									{
 										html = `<span> No nodes in the graph <span> <br> <button id='closeBtn' style='align:right'>Close</button> `
@@ -590,13 +604,40 @@
 											e = document.getElementById('selection2');
 											var rsIndex = e.value;
 											wnd.destroy();
-											if (lsIndex == 0)
+											var bottomY = firstEllipse.geometry.y + firstEllipse.geometry.height/2 + 30;
+											// find the lowest Y in the specified X range
+											var containerChildren = editor.graph.model.getChildren(newContainer);
+											for (i = 0; i < containerChildren.length; i++)
+											{
+												var cellType = containerChildren[i].getValue();
+												if (cellType.tagName == 'Connector')
+												{
+														var childEdges = editor.graph.getChildEdges(containerChildren[i]);
+														if (childEdges != undefined)
+														{
+															for (var j = 0; j < childEdges.length; j++)
+															{
+																if (childEdges[j].geometry.sourcePoint.y == childEdges[j].geometry.targetPoint.y && childEdges[j].geometry.targetPoint.y >= bottomY)
+																{
+																		if (childEdges[j].geometry.sourcePoint.x >= cellz[lsIndex].geometry.x && childEdges[j].geometry.targetPoint.x <= (cellz[rsIndex].geometry.x + cellz[rsIndex].geometry.width))
+																		{
+																			bottomY = childEdges[j].geometry.targetPoint.y;
+																		} else if (childEdges[j].geometry.targetPoint.x >= cellz[lsIndex].geometry.x && childEdges[j].geometry.sourcePoint.x <= (cellz[rsIndex].geometry.x + cellz[rsIndex].geometry.width)) {
+																			bottomY = childEdges[j].geometry.targetPoint.y;
+																		}
+																}
+															}
+														}
+												}
+											}
+											var setY = bottomY + 30;
+											if (isLeftmost(cellz, lsIndex))
 											{
 												// if left vertex is leftmost set the first terminal point from the middle of the line
 												var cellE = new mxCell('edge', new mxGeometry(0, 0, 50, 50), 'curved=1;endArrow=classic;html=1;');
 												var lsCGeo = cellz[lsIndex].getGeometry();
 												cellE.geometry.setTerminalPoint(new mxPoint(((lsCGeo.x - firstEllipseGeo.x) / 2), firstEllipseGeo.y + firstEllipseGeo.height/2), true);
-												cellE.geometry.setTerminalPoint(new mxPoint(lsCGeo.x, firstEllipseGeo.y + 50), false);
+												cellE.geometry.setTerminalPoint(new mxPoint(lsCGeo.x, setY), false);
 												cellE.edge = true;
 												cellE = editor.graph.addCell(cellE, ellipseEdge);
 												editor.graph.fireEvent(new mxEventObject('cellsInserted', 'cells', [cellE]));
@@ -605,18 +646,18 @@
 												var cellE = new mxCell('edge', new mxGeometry(0, 0, 50, 50), 'curved=1;endArrow=classic;html=1;');
 												var lsCGeo = cellz[lsIndex].getGeometry();
 												var lsCGeoP = cellz[lsIndex-1].getGeometry();
-												cellE.geometry.setTerminalPoint(new mxPoint((lsCGeoP.x+lsCGeoP.width + ((lsCGeo.x-lsCGeoP.x-lsCGeoP.width)/2)), firstEllipseGeo.y + firstEllipseGeo.height/2), true);
-												cellE.geometry.setTerminalPoint(new mxPoint(lsCGeo.x, firstEllipseGeo.y + 50), false);
+												cellE.geometry.setTerminalPoint(new mxPoint((lsCGeoP.x+lsCGeoP.width + ((lsCGeo.x-lsCGeoP.x-lsCGeoP.width)/2)), lsCGeo.y + lsCGeo.height/2), true);
+												cellE.geometry.setTerminalPoint(new mxPoint(lsCGeo.x, setY), false);
 												cellE.edge = true;
 												cellE = editor.graph.addCell(cellE, ellipseEdge);
 												editor.graph.fireEvent(new mxEventObject('cellsInserted', 'cells', [cellE]));
 											}
-											if (rsIndex == cellz.length-1)
+											if (isRightmost(cellz, rsIndex))
 											{
 												// if right vertex is rightmost set the second terminal point from the middle of the line
 												var cellE2 = new mxCell('edge', new mxGeometry(0, 0, 50, 50), 'curved=1;endArrow=classic;html=1;');
 												var lsCGeo2 = cellz[rsIndex].getGeometry();
-												cellE2.geometry.setTerminalPoint(new mxPoint(lsCGeo2.x+lsCGeo2.width, firstEllipseGeo.y + 50), true);
+												cellE2.geometry.setTerminalPoint(new mxPoint(lsCGeo2.x+lsCGeo2.width, setY), true);
 												cellE2.geometry.setTerminalPoint(new mxPoint(lsCGeo2.x + lsCGeo2.width + (secondEllipseGeo.x-lsCGeo2.x-lsCGeo2.width)/2, firstEllipseGeo.y + firstEllipseGeo.height/2), false);
 												cellE2.edge = true;
 												cellE2 = editor.graph.addCell(cellE2, ellipseEdge);
@@ -626,25 +667,25 @@
 												var cellE2 = new mxCell('edge', new mxGeometry(0, 0, 50, 50), 'curved=1;endArrow=classic;html=1;');
 												var lsCGeo2 = cellz[rsIndex].getGeometry();
 												var lsCGeoP2 = cellz[rsIndex-(-1)].getGeometry();
-												cellE2.geometry.setTerminalPoint(new mxPoint(lsCGeo2.x+lsCGeo2.width, firstEllipseGeo.y + 50), true);
-												cellE2.geometry.setTerminalPoint(new mxPoint((lsCGeo2.x+lsCGeo2.width + ((lsCGeoP2.x-lsCGeo2.width-lsCGeo2.x)/2)), firstEllipseGeo.y + firstEllipseGeo.height/2), false);
+												cellE2.geometry.setTerminalPoint(new mxPoint(lsCGeo2.x+lsCGeo2.width, setY), true);
+												cellE2.geometry.setTerminalPoint(new mxPoint((lsCGeo2.x+lsCGeo2.width + ((lsCGeoP2.x-lsCGeo2.width-lsCGeo2.x)/2)), lsCGeo2.y + lsCGeo2.height/2), false);
 												cellE2.edge = true;
 												cellE2 = editor.graph.addCell(cellE2, ellipseEdge);
 												editor.graph.fireEvent(new mxEventObject('cellsInserted', 'cells', [cellE2]));
 											}
 											// connecting edge between 2 edges
 											var cellE3 = new mxCell('edge', new mxGeometry(0, 0, 50, 50), 'curved=1;endArrow=classic;html=1;');
-											cellE3.geometry.setTerminalPoint(new mxPoint(lsCGeo.x, firstEllipseGeo.y + 50), true);
-											cellE3.geometry.setTerminalPoint(new mxPoint(lsCGeo2.x+lsCGeo2.width, firstEllipseGeo.y + 50), false);
+											cellE3.geometry.setTerminalPoint(new mxPoint(lsCGeo.x, setY), true);
+											cellE3.geometry.setTerminalPoint(new mxPoint(lsCGeo2.x+lsCGeo2.width, setY), false);
 											cellE3.edge = true;
 											cellE3 = editor.graph.addCell(cellE3, ellipseEdge);
 											editor.graph.fireEvent(new mxEventObject('cellsInserted', 'cells', [cellE3]));
 											vertGeo = editor.graph.getCellGeometry(vert).clone();
-											vertGeo.y += 50;
+											vertGeo.y = bottomY + 50;
 											editor.graph.model.setGeometry(vert, vertGeo);
 											// resizing the container
 											var containerGeo = editor.graph.getCellGeometry(newContainer).clone();
-											containerGeo.height += 50;
+											containerGeo.height = vertGeo.y + vertGeo.height;
 											editor.graph.model.setGeometry(newContainer, containerGeo);
 											// variables to use later to determine where to place new cells
 											var cellE3G = cellE3.geometry;
@@ -848,7 +889,6 @@
 					} else {
 						var overlay = new mxCellOverlay(new mxImage('images/add.png', 0, 0), 'Add New Element');
 					}
-					console.log('secondEllipseGeo.x = ', secondEllipseGeo.x, ' firstEllipseGeo.x = ', firstEllipseGeo.x, ' overlay offset x = ', overlay.offset.x);
 					overlay.cursor = 'hand';
 					editor.graph.addCellOverlay(ellipseEdge, overlay);
 
@@ -886,10 +926,31 @@
 								if (cellType.tagName == 'Rect' || cellType.tagName == 'Roundrect') {
 									var geoCompare = containerChildren[i].getGeometry();
 									// console.log('geoCompare.x = ', geoCompare.x);
-										if (geoCompare.x > farRightX ) {
+										if (geoCompare.x > farRightX && geoCompare.y == secondEllipseGeo.y-6) {
 											farRightX = geoCompare.x + geoCompare.width/2;
 											var geoCompareF = geoCompare;
 										}
+								}
+							}
+							// searching for far right edge point
+							for (i = 0; i < containerChildren.length; i++)
+							{
+								var cellType = containerChildren[i].getValue();
+								if (cellType.tagName == 'Connector')
+								{
+									var childEdges = editor.graph.getChildEdges(containerChildren[i]);
+									for (var j = 0; j < childEdges.length; j++)
+									{
+										if (childEdges[j].geometry.sourcePoint.x > farRightX)
+										{
+											farRightX = childEdges[j].geometry.sourcePoint.x;
+										}
+										if (childEdges[j].geometry.targetPoint.x > farRightX)
+										{
+											farRightX = childEdges[j].geometry.targetPoint.x;
+										}
+									}
+									break;
 								}
 							}
 
@@ -900,6 +961,7 @@
 							// console.log('width, = ', stringRectangleGeo.width);
 							stringRectangleGeo.y = secondEllipseGeo.y-6;
 							if (typeof geoCompare != "undefined"){
+								//stringRectangleGeo.x = farRightX + geoCompareF.width;
 								stringRectangleGeo.x = farRightX + geoCompareF.width;
 							} else {
 								stringRectangleGeo.x = (((secondEllipseGeo.x - firstEllipseGeo.x) / 2) - (stringRectangleGeo.width / 2) + farRightX);
@@ -945,7 +1007,8 @@
 					};
 
 					// measuring the text width
-					function getTextWidth(text, font) {
+					function getTextWidth(text, font)
+					{
 	    			var canvas = getTextWidth.canvas || (getTextWidth.canvas = document.createElement("canvas"));
 				    var context = canvas.getContext("2d");
 				    context.font = font;
@@ -953,7 +1016,41 @@
 				    return metrics.width;
 					}
 
+					function isRightmost(list, index)
+					{
+						var right = new Array();
+						for (var i=0; i < list.length; i++)
+						{
+							if (list[i].geometry.x > list[index].geometry.x && list[i].geometry.y == list[index].geometry.y)
+							{
+								right.push(list[i]);
+							}
+						}
+						if (right.length == 0)
+						{
+							return true
+						} else {
+							return false
+						}
+					}
 
+					function isLeftmost(list, index)
+					{
+						var left = new Array();
+						for (var i=0; i < list.length; i++)
+						{
+							if (list[i].geometry.x < list[index].geometry.x && list[i].geometry.y == list[index].geometry.y)
+							{
+								left.push(list[i]);
+							}
+						}
+						if (left.length == 0)
+						{
+							return true
+						} else {
+							return false
+						}
+					}
 					// @todo:
 					// re-align non-terminals
 					// !!!DONE!!! add overlay toggle
