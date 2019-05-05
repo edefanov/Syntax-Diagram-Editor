@@ -540,25 +540,27 @@
 							 	var cellPointer = me.getCell();
 								var cellPointerGeo = editor.graph.getCellGeometry(cellPointer).clone();
 								var containerGeo = editor.graph.getCellGeometry(newContainer).clone();
+
+								// if the cell clicked on is the vertical add overlay
 								if (cellPointer.style == 'image;image=images/add.png;editable=0;movable=0;selectable=0;resizable=0' && cellPointer.parent == newContainer)
 								{
 									// click on the add vertical elements overlay, draw red dot points between cells
 									var cells = editor.graph.getChildCells(newContainer);
-									// var size = 0
-									var labels = []
 									var cellz = []
 									var dots = []
 									console.log(cells);
+
 									// go through cells and add red dot cell to the right of each cell
 									for (var i=0; i < cells.length; i++)
 									{
 										if (cells[i].value.tagName == 'Rect' || cells[i].value.tagName == 'Roundrect')
 										{
-											var vertO = editor.graph.insertVertex(newContainer, null, '', (cells[i].geometry.x+cells[i].geometry.width+30), cells[i].geometry.y, 20, 20, 'image;image=images/symbols/event_end.png;editable=0;movable=0;selectable=0;resizable=0');
+											var vertO = editor.graph.insertVertex(newContainer, null, '', (cells[i].geometry.x+cells[i].geometry.width+10), cells[i].geometry.y, 20, 20, 'image;image=images/symbols/event_end.png;editable=0;movable=0;selectable=0;resizable=0');
 											dots.unshift(vertO);
 											cellz.unshift(cells[i]);
 										}
 									}
+
 									// go through cells again and add red dot cells to the left of leftmost cells
 									for (var i=0; i < cellz.length; i++)
 									{
@@ -569,19 +571,10 @@
 										}
 									}
 
-									console.log('labels = ', labels);
-									var htmlList = ''
-									var html = ''
-									if (labels.length > 0)
-									{
-										html = `<button id='submitBtn' style='align:right'>Select</button> <button id='closeBtn' style='align:right'>Cancel</button>`
-									} else
-									{
-										html = `<span> No nodes in the graph <span> <br> <button id='closeBtn' style='align:right'>Close</button> `
-									}
+									var html = `<span id='vertTip'> Select the first (start) point </span> <br> <button id='closeBtn' style='align:right'>Cancel</button> `
 									var tb = document.createElement('div');
 									tb.innerHTML = html;
-									wnd = new mxWindow('Connection Select', tb, (document.getElementById('graph').getBoundingClientRect().left + containerGeo.width + 25), document.getElementById('graph').getBoundingClientRect().top, 300 , 200, false, true);
+									wnd = new mxWindow('Connection Select', tb, (document.getElementById('graph').getBoundingClientRect().right-200, document.getElementById('graph').getBoundingClientRect().bottom-100), 200, 100, false, true);
 									wnd.setLocation = function(x, y)
 									{
 									  x = Math.max(0, x);
@@ -597,26 +590,23 @@
 											editor.graph.model.remove(dots[i]);
 										}
 										wnd.destroy();
+										overlayInput.checked = true;
+										toggleOverlay(editor);
+										clickedOn.length = 0;
 									};
-									if (labels.length > 0)
-									{
-										document.getElementById('submitBtn').onclick = function()
-										{
-											var lsIndex = 0;
-											var rsIndex = 0;
-											wnd.destroy();
-										};
-									}
+									overlayInput.checked = false;
+									toggleOverlay(editor);
 									wnd.setVisible(true);
 								}
 
+								// if the cell clicked on is the dot
 								if (cellPointer.style == 'image;image=images/symbols/event_end.png;editable=0;movable=0;selectable=0;resizable=0' && cellPointer.parent == newContainer)
 								{
 
 									// add the cell coordinates to the clickedOn array
 									if (clickedOn.length < 4)
 									{
-										clickedOn.push(cellPointerGeo.x);
+										clickedOn.push(cellPointerGeo.x+cellPointerGeo.width/2);
 										clickedOn.push(cellPointerGeo.y+10);
 									}
 
@@ -643,8 +633,8 @@
 												editor.graph.model.remove(cells[i]);
 											}
 										}
-										// add the lines Here
 										var bottomY = firstEllipse.geometry.y + firstEllipse.geometry.height/2 + 30;
+
 										// find the lowest Y in the specified X range
 										var containerChildren = editor.graph.model.getChildren(newContainer);
 										for (i = 0; i < containerChildren.length; i++)
@@ -673,7 +663,7 @@
 										var setY = bottomY + 30;
 
 										// left line
-										var cellE = new mxCell('edge', new mxGeometry(0, 0, 50, 50), 'curved=1;endArrow=classic;html=1;');
+										var cellE = new mxCell('edge', new mxGeometry(0, 0, 50, 50), 'curved=0;endArrow=classic;html=1;');
 										cellE.geometry.setTerminalPoint(new mxPoint(clickedOn[0], clickedOn[1]), true);
 										cellE.geometry.setTerminalPoint(new mxPoint(clickedOn[0]+30, setY), false);
 										cellE.edge = true;
@@ -681,7 +671,7 @@
 										editor.graph.fireEvent(new mxEventObject('cellsInserted', 'cells', [cellE]));
 
 										// right line
-										var cellE2 = new mxCell('edge', new mxGeometry(0, 0, 50, 50), 'curved=1;endArrow=classic;html=1;');
+										var cellE2 = new mxCell('edge', new mxGeometry(0, 0, 50, 50), 'curved=0;endArrow=classic;html=1;');
 										cellE2.geometry.setTerminalPoint(new mxPoint(clickedOn[2]-30, setY), true);
 										cellE2.geometry.setTerminalPoint(new mxPoint(clickedOn[2], clickedOn[3]), false);
 										cellE2.edge = true;
@@ -689,7 +679,7 @@
 										editor.graph.fireEvent(new mxEventObject('cellsInserted', 'cells', [cellE2]));
 
 										// middle flat line
-										var cellE3 = new mxCell('edge', new mxGeometry(0, 0, 50, 50), 'curved=1;endArrow=classic;html=1;');
+										var cellE3 = new mxCell('edge', new mxGeometry(0, 0, 50, 50), 'curved=0;endArrow=classic;html=1;');
 										cellE3.geometry.setTerminalPoint(new mxPoint(clickedOn[0]+30, setY), true);
 										cellE3.geometry.setTerminalPoint(new mxPoint(clickedOn[2]-30, setY), false);
 										cellE3.edge = true;
@@ -775,7 +765,7 @@
 												stringRectangleGeo.y = cellE3G.sourcePoint.y-10;
 												if (typeof geoCompareF != "undefined") {
 													// if there are cells on this Y level add up widths of the elements
-													var lengthSum = 10;
+													var lengthSum = 40;
 													for (i=0; i < elemLine.length; i++)
 													{
 														lengthSum += elemLine[i].getGeometry().width + 40;
@@ -816,27 +806,27 @@
 															var cellType = containerChildren[i].getValue();
 															if (cellType.tagName == 'Connector')
 															{
-																	var childEdges = editor.graph.getChildEdges(containerChildren[i]);
-																	for (var j = 0; j < childEdges.length; j++)
+																var childEdges = editor.graph.getChildEdges(containerChildren[i]);
+																for (var j = 0; j < childEdges.length; j++)
+																{
+																	if (childEdges[j].geometry.sourcePoint.x >= cellE3G.targetPoint.x)
 																	{
-																		if (childEdges[j].geometry.sourcePoint.x >= cellE3G.targetPoint.x)
+																		var cEdgesGeo = childEdges[j].geometry;
+																		cEdgesGeo.sourcePoint.x += stringRectangleGeo.width+40;
+																		editor.graph.model.setGeometry(childEdges[j], cEdgesGeo);
+																	}
+																	if (childEdges[j].geometry.targetPoint.x >= cellE3G.targetPoint.x) {
+																		var cEdgesGeo = childEdges[j].geometry;
+																		cEdgesGeo.targetPoint.x += stringRectangleGeo.width+40;
+																		editor.graph.model.setGeometry(childEdges[j], cEdgesGeo);
+																		if (editor.graph.getCellOverlays(childEdges[j]) != null)
 																		{
-																			var cEdgesGeo = childEdges[j].geometry;
-																			cEdgesGeo.sourcePoint.x += stringRectangleGeo.width+40;
-																			editor.graph.model.setGeometry(childEdges[j], cEdgesGeo);
-																		}
-																		if (childEdges[j].geometry.targetPoint.x >= cellE3G.targetPoint.x) {
-																			var cEdgesGeo = childEdges[j].geometry;
-																			cEdgesGeo.targetPoint.x += stringRectangleGeo.width+40;
-																			editor.graph.model.setGeometry(childEdges[j], cEdgesGeo);
-																			if (editor.graph.getCellOverlays(childEdges[j]) != null)
-																			{
-																				var cOverlay = editor.graph.getCellOverlays(childEdges[j])[0];
-																				cOverlay.image = new mxImage('images/add.png', 28, 28);
-																				cOverlay.offset.x = Math.abs((cEdgesGeo.targetPoint.x - cEdgesGeo.sourcePoint.x) / 2);
-																			}
+																			var cOverlay = editor.graph.getCellOverlays(childEdges[j])[0];
+																			cOverlay.image = new mxImage('images/add.png', 28, 28);
+																			cOverlay.offset.x = Math.abs((cEdgesGeo.targetPoint.x - cEdgesGeo.sourcePoint.x) / 2);
 																		}
 																	}
+																}
 															}
 														}
 														stringRectangleGeo.x = farRightX + 40;
@@ -845,8 +835,65 @@
 														stringRectangleGeo.x = farRightX + 40;
 													}
 												} else {
-													// if there are no cells on this Y level put the cell on the leftmost point
-													// stringRectangleGeo.x = (cellE2G.sourcePoint.x - cellEG.sourcePoint.x) / 2 + cellEG.sourcePoint.x - stringRectangleGeo.width/2;
+													// if there are no cells on this Y level check the line length, extend it if needed and then put the cell on the leftmost point
+													if (stringRectangleGeo.width > Math.abs(cellE3G.targetPoint.x - cellE3G.sourcePoint.x))
+													{
+														var containerChildren = editor.graph.model.getChildren(newContainer);
+														for (i=0; i<containerChildren.length; i++)
+														{
+															// if rectangle and to the right move further to the right
+															var cellType = containerChildren[i].getValue();
+															if (cellType.tagName == 'Rect' || cellType.tagName == 'Roundrect')
+															{
+																if (containerChildren[i].geometry.x >= cellE3G.targetPoint.x)
+																{
+																	var currCellGeo = containerChildren[i].geometry;
+																	currCellGeo.x += stringRectangleGeo.width+20;
+																	editor.graph.model.setGeometry(containerChildren[i], currCellGeo);
+																}
+															}
+														}
+														for (i=0; i<containerChildren.length; i++)
+														{
+															// if ellipse move to the right
+															var cellStyle = containerChildren[i].getStyle();
+															if (cellStyle == 'ellipse')
+															{
+																if (containerChildren[i].geometry.x > cellE3G.targetPoint.x)
+																{
+																	var currCellGeo = containerChildren[i].geometry;
+																	currCellGeo.x += stringRectangleGeo.width+20;
+																	editor.graph.model.setGeometry(containerChildren[i], currCellGeo);
+																}
+															}
+															// moving the edge(s) to the right
+															var cellType = containerChildren[i].getValue();
+															if (cellType.tagName == 'Connector')
+															{
+																var childEdges = editor.graph.getChildEdges(containerChildren[i]);
+																for (var j = 0; j < childEdges.length; j++)
+																{
+																	if (childEdges[j].geometry.sourcePoint.x >= cellE3G.targetPoint.x)
+																	{
+																		var cEdgesGeo = childEdges[j].geometry;
+																		cEdgesGeo.sourcePoint.x += stringRectangleGeo.width+20;
+																		editor.graph.model.setGeometry(childEdges[j], cEdgesGeo);
+																	}
+																	if (childEdges[j].geometry.targetPoint.x >= cellE3G.targetPoint.x) {
+																		var cEdgesGeo = childEdges[j].geometry;
+																		cEdgesGeo.targetPoint.x += stringRectangleGeo.width+20;
+																		editor.graph.model.setGeometry(childEdges[j], cEdgesGeo);
+																		if (editor.graph.getCellOverlays(childEdges[j]) != null)
+																		{
+																			var cOverlay = editor.graph.getCellOverlays(childEdges[j])[0];
+																			cOverlay.image = new mxImage('images/add.png', 28, 28);
+																			cOverlay.offset.x = Math.abs((cEdgesGeo.targetPoint.x - cEdgesGeo.sourcePoint.x) / 2);
+																		}
+																	}
+																}
+															}
+														}
+													}
 													if (cellE3G.targetPoint.x > cellE3G.sourcePoint.x)
 													{
 														stringRectangleGeo.x = cellE3G.sourcePoint.x + 10;
@@ -885,6 +932,9 @@
 											}
 										});
 										clickedOn.length = 0;
+										wnd.destroy();
+										overlayInput.checked = true;
+										toggleOverlay(editor);
 									}
 								}
 						 }
@@ -944,7 +994,7 @@
 									var geoCompare = containerChildren[i].getGeometry();
 									// console.log('geoCompare.x = ', geoCompare.x);
 										if (geoCompare.x > farRightX && geoCompare.y == secondEllipseGeo.y-6) {
-											farRightX = geoCompare.x + geoCompare.width/2;
+											farRightX = geoCompare.x + geoCompare.width;
 											var geoCompareF = geoCompare;
 										}
 								}
@@ -978,10 +1028,9 @@
 							// console.log('width, = ', stringRectangleGeo.width);
 							stringRectangleGeo.y = secondEllipseGeo.y-6;
 							if (typeof geoCompare != "undefined"){
-								//stringRectangleGeo.x = farRightX + geoCompareF.width;
-								stringRectangleGeo.x = farRightX + geoCompareF.width;
+								stringRectangleGeo.x = farRightX + 40;
 							} else {
-								stringRectangleGeo.x = (((secondEllipseGeo.x - firstEllipseGeo.x) / 2) - (stringRectangleGeo.width / 2) + farRightX);
+								stringRectangleGeo.x = firstEllipseGeo.x + firstEllipseGeo.width + 40;
 							}
 							editor.graph.model.setGeometry(stringRectangle, stringRectangleGeo);
 
