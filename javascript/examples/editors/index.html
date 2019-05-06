@@ -222,7 +222,7 @@
 
 			// Create select actions in page
 			var node = document.getElementById('mainActions');
-			var buttons = ['new', 'savelocal', 'save', 'open', 'cut', 'copy', 'paste', 'delete', 'undo', 'redo', 'print', 'save'];
+			var buttons = ['new', 'savelocal', 'save', 'open', 'cut', 'copy', 'paste', 'delete', 'undo', 'redo', 'print'];
 
 			// Client-side code for image export
 			var exportImage = function(editor)
@@ -583,7 +583,7 @@
 										if (cells[i].value.tagName == 'Rect' || cells[i].value.tagName == 'Roundrect')
 										{
 											var flag = false;
-											var checkX = cells[i].geometry.x+cells[i].geometry.width/2;
+											var checkX = cells[i].geometry.x;
 											var containerChildren = editor.graph.model.getChildren(newContainer);
 											for (z = 0; z < containerChildren.length; z++)
 											{
@@ -792,9 +792,28 @@
 										editor.graph.fireEvent(new mxEventObject('cellsInserted', 'cells', [cellE3]));
 
 
-										// move the overlay itself
+										// find lowest Y and move the overlay itself
+										var overlayY = 0;
+										for (i = 0; i < containerChildren.length; i++)
+										{
+											var cellType = containerChildren[i].getValue();
+											if (cellType.tagName == 'Connector')
+											{
+													var childEdges = editor.graph.getChildEdges(containerChildren[i]);
+													if (childEdges != undefined)
+													{
+														for (var j = 0; j < childEdges.length; j++)
+														{
+															if (childEdges[j].geometry.sourcePoint.y == childEdges[j].geometry.targetPoint.y && childEdges[j].geometry.targetPoint.y >= bottomY)
+															{
+																overlayY = childEdges[j].geometry.targetPoint.y;
+															}
+														}
+													}
+											}
+										}
 										var vertGeo = vert.geometry;
-										vertGeo.y = bottomY + 50;
+										vertGeo.y = overlayY + 50;
 										editor.graph.model.setGeometry(vert, vertGeo);
 
 										// resizing the container
@@ -1297,12 +1316,18 @@
 					// !!!DONE!!! xml saving
 					// !!!DONE!!! redo gui
 					// !!!DONE!!! rectangle width based on text width
-					// add overlays processing to xml opening
+					// !!!DONE!!! add overlays processing to xml opening
 					// !!!DONE!!! implement local storage
 					// file ierarchy and dependencies cleanup
 					editor.graph.refresh();
 			}
 		})
+
+		//////////////////////
+		//									//
+		// HELPER FUNCTIONS //
+		//									//
+		//////////////////////
 
 		// adds overlays to the model
 		function populateOverlays()
@@ -1774,7 +1799,7 @@
 									if (cells[i].value.tagName == 'Rect' || cells[i].value.tagName == 'Roundrect')
 									{
 										var flag = false;
-										var checkX = cells[i].geometry.x+cells[i].geometry.width/2;
+										var checkX = cells[i].geometry.x;
 										var containerChildren = editor.graph.model.getChildren(newContainer);
 										for (z = 0; z < containerChildren.length; z++)
 										{
@@ -2087,10 +2112,8 @@
 									if (specialCase == 0)
 									{
 										overlayV.offset.x = (cellE2target.x-cellEtarget.x - 60)/2;
-										console.log('specialcase 0 overlay offset = ', (cellE2target.x-cellEtarget.x - 60)/2);
 									} else if (specialCase == 2) {
 										overlayV.offset.x = (cellE2target.x-cellEtarget.x - 60)/2;
-										console.log('specialcase 2 overlay offset', ((cellE2target.x-cellEtarget.x - 60)/2));
 									}
 
 									editor.graph.addCellOverlay(cellE3, overlayV);
@@ -2124,7 +2147,6 @@
 											// searching for far right cell x coordinate
 											var elemLine = new Array();
 											var containerChildren = editor.graph.model.getChildren(newContainer);
-											console.log(containerChildren);
 											var farRightX = cellEtarget.x;
 											for (i = 0; i < containerChildren.length; i++)
 											{
@@ -2350,17 +2372,10 @@
 				 {},
 				 dragLeave: function(evt, state)
 				 {}
-			 	});
+				});
 
 			}
 		}
-
-		//////////////////////
-		//									//
-		// HELPER FUNCTIONS //
-		//									//
-		//////////////////////
-
 
 		// check if the cell is the rightmost on its height level
 		function isRightmost(list, index)
@@ -2479,13 +2494,13 @@
 		</div>
 		<div id="selectActions" style="width:95%;padding-left:54px;padding-bottom:4px;">
 		</div>
-		<div style="padding-left:12px;width:95%;">
-		<table id="table" border="1" width='100%' height='88%'>
+		<div style="padding-left:12px;width:100%;">
+		<table id="table" border="1" width='95%' height='88%'>
 			<tr>
 				<td id="toolbar" style="width:5%;padding-left:20px;" valign="top"> <br>
 					<!-- Toolbar Here -->
 				</td>
-				<td id="graphTd" valign="top" >
+				<td id="graphTd" valign="top" style="width:95%;" >
 					<div id="graph" tabindex="-1" style="position:relative;height:100%;width:100%;overflow:hidden;cursor:default;">
 						<!-- Graph Here -->
 						<center id="splash" style="padding-top:230px;">
