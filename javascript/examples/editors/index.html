@@ -859,7 +859,16 @@
 											var overlayV = new mxCellOverlay(new mxImage('images/add.png', 0, 0), 'Add New Element');
 										}
 										overlayV.cursor = 'hand';
-										overlayV.offset.x = (clickedOn[2]-clickedOn[0] - 60)/2
+										// overlayV.offset.x = (clickedOn[2]-clickedOn[0] - 60)/2
+										if (specialCase == 0)
+										{
+											overlayV.offset.x = (cellE2target.x-cellEtarget.x - 60)/2;
+											console.log('specialcase 0 overlay offset = ', (cellE2target.x-cellEtarget.x - 60)/2);
+										} else if (specialCase == 2) {
+											overlayV.offset.x = (cellE2target.x-cellEtarget.x - 60)/2;
+											console.log('specialcase 2 overlay offset', ((cellE2target.x-cellEtarget.x - 60)/2));
+										}
+
 										editor.graph.addCellOverlay(cellE3, overlayV);
 
 										// overlay click action
@@ -968,6 +977,12 @@
 																		var cEdgesGeo = childEdges[j].geometry;
 																		cEdgesGeo.sourcePoint.x += stringRectangleGeo.width+40;
 																		editor.graph.model.setGeometry(childEdges[j], cEdgesGeo);
+																		if (editor.graph.getCellOverlays(childEdges[j]) != null)
+																		{
+																			var cOverlay = editor.graph.getCellOverlays(childEdges[j])[0];
+																			cOverlay.image = new mxImage('images/add.png', 28, 28);
+																			cOverlay.offset.x = Math.abs((cEdgesGeo.targetPoint.x - cEdgesGeo.sourcePoint.x) / 2);
+																		}
 																	}
 																	if (childEdges[j].geometry.targetPoint.x >= compTargetX) {
 																		var cEdgesGeo = childEdges[j].geometry;
@@ -1033,6 +1048,12 @@
 																		var cEdgesGeo = childEdges[j].geometry;
 																		cEdgesGeo.sourcePoint.x += stringRectangleGeo.width+10;
 																		editor.graph.model.setGeometry(childEdges[j], cEdgesGeo);
+																		if (editor.graph.getCellOverlays(childEdges[j]) != null)
+																		{
+																			var cOverlay = editor.graph.getCellOverlays(childEdges[j])[0];
+																			cOverlay.image = new mxImage('images/add.png', 28, 28);
+																			cOverlay.offset.x = Math.abs((cEdgesGeo.targetPoint.x - cEdgesGeo.sourcePoint.x) / 2);
+																		}
 																	}
 																	if (childEdges[j].geometry.targetPoint.x >= compTargetX ) {
 																		var cEdgesGeo = childEdges[j].geometry;
