@@ -547,26 +547,60 @@
 									var dots = []
 									console.log(cells);
 
-									// go through cells and add red dot cells to the left of each cell
+									// go through cells and add red dot cells to the left of each cell (only if there isnt a flat edge above the cell)
 									for (var i=0; i < cells.length; i++)
 									{
 										if (cells[i].value.tagName == 'Rect' || cells[i].value.tagName == 'Roundrect')
 										{
-											var vertO = editor.graph.insertVertex(newContainer, null, '', (cells[i].geometry.x-30), cells[i].geometry.y, 20, 20, 'image;image=images/symbols/event_end.png;editable=0;movable=0;selectable=0;resizable=0');
-											dots.unshift(vertO);
-											cellz.unshift(cells[i]);
+											var flag = false;
+											var checkX = cells[i].geometry.x+cells[i].geometry.width/2;
+											var containerChildren = editor.graph.model.getChildren(newContainer);
+											for (z = 0; z < containerChildren.length; z++)
+											{
+												var cellType = containerChildren[z].getValue();
+												if (cellType.tagName == 'Connector')
+												{
+														var childEdges = editor.graph.getChildEdges(containerChildren[z]);
+														if (childEdges != undefined)
+														{
+															for (var j = 0; j < childEdges.length; j++)
+															{
+																if (checkX < Math.max(childEdges[j].geometry.targetPoint.x, childEdges[j].geometry.sourcePoint.x) && checkX > Math.min(childEdges[j].geometry.targetPoint.x, childEdges[j].geometry.sourcePoint.x) && childEdges[j].geometry.targetPoint.y == childEdges[j].geometry.sourcePoint.y && cells[i].geometry.y < childEdges[j].geometry.sourcePoint.y-10)
+																{
+																	flag = true;
+																	break;
+																}
+															}
+														}
+												}
+											}
+											if (!flag)
+											{
+												var vertO = editor.graph.insertVertex(newContainer, null, '', (cells[i].geometry.x-30), cells[i].geometry.y, 20, 20, 'image;image=images/symbols/event_end.png;editable=0;movable=0;selectable=0;resizable=0');
+												dots.unshift(vertO);
+												cellz.unshift(cells[i]);
+												flag = false;
+											}
 										}
 									}
 
 									// go through cells again and add red dot cells to the right of rightmost cells
 									for (var i=0; i < cellz.length; i++)
 									{
-										if (isRightmost(cellz, i))
+										if (isRightmost(cellz, i) && cellz[i].geometry.y != firstEllipseGeo.y-6)
 										{
 											var vertO = editor.graph.insertVertex(newContainer, null, '', (cellz[i].geometry.x+cellz[i].geometry.width+10), cellz[i].geometry.y, 20, 20, 'image;image=images/symbols/event_end.png;editable=0;movable=0;selectable=0;resizable=0');
 											dots.unshift(vertO);
 										}
 									}
+
+									// add dot to the left of right ellipse
+									var vertO = editor.graph.insertVertex(newContainer, null, '', (secondEllipseGeo.x-20), secondEllipseGeo.y-6, 20, 20, 'image;image=images/symbols/event_end.png;editable=0;movable=0;selectable=0;resizable=0');
+									dots.unshift(vertO);
+
+									// add dot to the right of left ellipse
+									var vertO = editor.graph.insertVertex(newContainer, null, '', (firstEllipseGeo.x+firstEllipseGeo.width+10), firstEllipseGeo.y-6, 20, 20, 'image;image=images/symbols/event_end.png;editable=0;movable=0;selectable=0;resizable=0');
+									dots.unshift(vertO);
 
 									var html = `<span id='vertTip'> Select the first (start) point </span> <br> <button id='closeBtn' style='align:right'>Cancel</button> `
 									var tb = document.createElement('div');
@@ -800,19 +834,20 @@
 																}
 															}
 															// moving the edge(s) to the right
+															var compTargetX = cellE3G.targetPoint.x;
 															var cellType = containerChildren[i].getValue();
 															if (cellType.tagName == 'Connector')
 															{
 																var childEdges = editor.graph.getChildEdges(containerChildren[i]);
 																for (var j = 0; j < childEdges.length; j++)
 																{
-																	if (childEdges[j].geometry.sourcePoint.x >= cellE3G.targetPoint.x)
+																	if (childEdges[j].geometry.sourcePoint.x >= compTargetX)
 																	{
 																		var cEdgesGeo = childEdges[j].geometry;
 																		cEdgesGeo.sourcePoint.x += stringRectangleGeo.width+40;
 																		editor.graph.model.setGeometry(childEdges[j], cEdgesGeo);
 																	}
-																	if (childEdges[j].geometry.targetPoint.x >= cellE3G.targetPoint.x) {
+																	if (childEdges[j].geometry.targetPoint.x >= compTargetX) {
 																		var cEdgesGeo = childEdges[j].geometry;
 																		cEdgesGeo.targetPoint.x += stringRectangleGeo.width+40;
 																		editor.graph.model.setGeometry(childEdges[j], cEdgesGeo);
