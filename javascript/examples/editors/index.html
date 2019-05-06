@@ -232,6 +232,7 @@
 				var graph = editor.graph;
 				var scale = graph.view.scale;
 				var bounds = graph.getGraphBounds();
+				console.log(bounds);
 
 	        	// New image export
 				var xmlDoc = mxUtils.createXmlDocument();
@@ -245,6 +246,7 @@
 
 				var imgExport = new mxImageExport();
 			    imgExport.drawState(graph.getView().getState(graph.model.root), xmlCanvas);
+					console.log(xmlCanvas);
 
 				// Puts request data together
 				var w = Math.ceil(bounds.width * scale + 2);
@@ -258,14 +260,23 @@
 					var format = 'png';
 					var bg = '&bg=#FFFFFF';
 
-					var documentGraph = mxUtils.show(editor.graph, 'new', 10, 10);
+					editor.graph.fit(0,true,0,true,false,false);
+					editor.graph.view.rendering = true;
+					editor.graph.refresh();
+					//var documentGraph = mxUtils.show(editor.graph, 'new', 10, 10);
+					var documentGraph = mxUtils.show(editor.graph, 'new', 0, 0, bounds.width, bounds.height);
+					console.log(documentGraph);
 					var svg1 = new XMLSerializer().serializeToString(documentGraph);
 					var SVGCode = svg1.substring(
   					svg1.indexOf("<svg"),
 				    svg1.indexOf("</svg>")+6
 					);
 					var canvas = document.createElement('canvas');
-					canvg(canvas, SVGCode, {userCORS: true});
+					canvas.width = bounds.width;
+					canvas.height = bounds.height;
+					canvas.style.width = bounds.width;
+					canvas.style.height = bounds.height;
+					canvg(canvas, SVGCode, {userCORS: true, ignoreDimensions: true});
 					var dataURL = canvas.toDataURL('image/png');
 					var data = atob(dataURL.substring('data:image/png;base64,'.length)),
       			asArray = new Uint8Array(data.length);
