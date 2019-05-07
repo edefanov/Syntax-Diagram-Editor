@@ -7,6 +7,7 @@
 		var mxBasePath = '../src';
 	</script>
 	<script type="text/javascript" src="../src/js/mxClient.js"></script>
+	<script type="text/javascript" src="../src/js/FileSaver.js"></script>
 	<script type="text/javascript" src="js/app.js"></script>
 	<script src="https://cdn.jsdelivr.net/npm/canvg/dist/browser/canvg.min.js"></script>
 	<script type="text/javascript">
@@ -236,7 +237,7 @@
 
 			// Create select actions in page
 			var node = document.getElementById('mainActions');
-			var buttons = ['new', 'savelocal', 'save', 'open', 'cut', 'copy', 'paste', 'delete', 'undo', 'redo', 'print'];
+			var buttons = ['new', 'open', 'savelocal', 'save', 'cut', 'copy', 'paste', 'delete', 'undo', 'redo', 'print'];
 
 			// Client-side code for image export
 			var exportImage = function(editor)
@@ -246,78 +247,47 @@
 				var graph = editor.graph;
 				var scale = graph.view.scale;
 				var bounds = graph.getGraphBounds();
-				console.log(bounds);
 
-	        	// New image export
-				var xmlDoc = mxUtils.createXmlDocument();
-				var root = xmlDoc.createElement('output');
-				xmlDoc.appendChild(root);
-
-			    // Renders graph. Offset will be multiplied with state's scale when painting state.
-				var xmlCanvas = new mxXmlCanvas2D(root);
-				xmlCanvas.translate(Math.floor(1 / scale - bounds.x), Math.floor(1 / scale - bounds.y));
-				xmlCanvas.scale(scale);
-
-				var imgExport = new mxImageExport();
-			    imgExport.drawState(graph.getView().getState(graph.model.root), xmlCanvas);
-					console.log(xmlCanvas);
-
-				// Puts request data together
-				var w = Math.ceil(bounds.width * scale + 2);
-				var h = Math.ceil(bounds.height * scale + 2);
-				var xml = mxUtils.getXml(root);
-
-				// Requests image if request is valid
-				if (w > 0 && h > 0)
-				{
-					var name = 'export.png';
-					var format = 'png';
-					var bg = '&bg=#FFFFFF';
-
-					editor.graph.fit(0,true,0,true,false,false);
-					editor.graph.view.rendering = true;
-					editor.graph.refresh();
-					//var documentGraph = mxUtils.show(editor.graph, 'new', 10, 10);
-					var documentGraph = mxUtils.show(editor.graph, 'new', 0, 0, bounds.width, bounds.height);
-					console.log(documentGraph);
-					var svg1 = new XMLSerializer().serializeToString(documentGraph);
-					var SVGCode = svg1.substring(
-  					svg1.indexOf("<svg"),
-				    svg1.indexOf("</svg>")+6
-					);
-					var canvas = document.createElement('canvas');
-					canvas.width = bounds.width;
-					canvas.height = bounds.height;
-					canvas.style.width = bounds.width;
-					canvas.style.height = bounds.height;
-					canvg(canvas, SVGCode, {userCORS: true, ignoreDimensions: true});
-					var dataURL = canvas.toDataURL('image/png');
-					var data = atob(dataURL.substring('data:image/png;base64,'.length)),
-      			asArray = new Uint8Array(data.length);
-					for (var i = 0, len = data.length; i < len; ++i) {
-    					asArray[i] = data.charCodeAt(i);
-					}
-					var pngBlob = new Blob([asArray.buffer], {type: 'image/png'});
-					var pngUrl = URL.createObjectURL(pngBlob);
-					var downloadLink = document.createElement("a");
-					downloadLink.href = pngUrl;
-					do {
-						var fileName = prompt("PNG File Name", "enter here");
-						if (fileName.indexOf('.png') == -1) {
-							fileName = fileName + '.png';
-						}
-					} while (fileName.length > 255 || fileName.length <= 0);
-					downloadLink.download = fileName;
-					document.body.appendChild(downloadLink);
-					downloadLink.click();
-					document.body.removeChild(downloadLink);
-					overlayInput.checked = true;
-					toggleOverlay(editor);
-
-					// new mxXmlRequest(editor.urlImage, 'filename=' + name + '&format=' + format +
-	        // 			bg + '&w=' + w + '&h=' + h + '&xml=' + encodeURIComponent(xml)).
-	        // 			simulate(document, '_blank');
+				//editor.graph.fit(0,true,0,true,false,false);
+				//editor.graph.view.rendering = true;
+				editor.graph.refresh();
+				//var documentGraph = mxUtils.show(editor.graph, 'new', 10, 10);
+				var documentGraph = mxUtils.show(editor.graph, 'new', 0, 0, bounds.width, bounds.height);
+				console.log(documentGraph);
+				var svg1 = new XMLSerializer().serializeToString(documentGraph);
+				var SVGCode = svg1.substring(
+					svg1.indexOf("<svg"),
+			    svg1.indexOf("</svg>")+6
+				);
+				var canvas = document.createElement('canvas');
+				canvas.width = bounds.width;
+				canvas.height = bounds.height;
+				canvas.style.width = bounds.width;
+				canvas.style.height = bounds.height;
+				canvg(canvas, SVGCode, {userCORS: true, ignoreDimensions: true});
+				var dataURL = canvas.toDataURL('image/png');
+				var data = atob(dataURL.substring('data:image/png;base64,'.length)),
+    			asArray = new Uint8Array(data.length);
+				for (var i = 0, len = data.length; i < len; ++i) {
+  					asArray[i] = data.charCodeAt(i);
 				}
+				var pngBlob = new Blob([asArray.buffer], {type: 'image/png'});
+				var pngUrl = URL.createObjectURL(pngBlob);
+				var downloadLink = document.createElement("a");
+				downloadLink.href = pngUrl;
+				do {
+					var fileName = prompt("PNG File Name", "enter here");
+					if (fileName.indexOf('.png') == -1) {
+						fileName = fileName + '.png';
+					}
+				} while (fileName.length > 255 || fileName.length <= 0);
+				downloadLink.download = fileName;
+				document.body.appendChild(downloadLink);
+				downloadLink.click();
+				document.body.removeChild(downloadLink);
+				overlayInput.checked = true;
+				toggleOverlay(editor);
+
 			};
 
 			// Client-side code for SVG export
@@ -396,15 +366,16 @@
 				//new mxXmlRequest(editor.urlEcho, 'filename=' + name + '&format=svg' + '&xml=' + xml).simulate(document, "_blank");
 			};
 
-			buttons[4] = 'exportWindow';
 			buttons.push('exportImage');
 			buttons.push('exportSvg');
 
 			// add openlocal if there is a state in localstorage
 			if (localStorage.getItem('state') != null)
 			{
-				buttons[3] = 'openlocal';
+				buttons.splice(3, 0, 'openlocal');
 			}
+
+			buttons.splice(5, 0, 'exportWindow');
 
 			// save state to local storage function
 			var saveToLocal = function()
@@ -432,9 +403,57 @@
 				window.open(window.location.href, '_blank');
 			}
 
+			// save xml file function
 			var saveDialog = function()
 			{
+				var fileName = prompt("XML File Name (without extension)", "filename");
+				if (fileName != null && fileName.length < 255 && fileName.length > 0)
+				{
+					if (fileName.indexOf('.xml') == -1)
+					{
+						fileName = fileName + '.xml';
+					}
+				}
+				if (fileName)
+				{
+					var encoder = new mxCodec();
+					var result = encoder.encode(editor.graph.getModel());
+					var fileContent = mxUtils.getXml(result);
+					var blob = new Blob([fileContent], {type: "text/xml;charset=utf-8"});
+					saveAs(blob, fileName);
+				}
+			}
 
+			// open xml file function
+			var openDialog = function()
+			{
+				var fileInputDialog = document.getElementById('file-input');
+				fileInputDialog.onchange = function(event) {
+   				var file = fileInputDialog.files[0];
+					if (file)
+					{
+						var reader = new FileReader();
+						reader.onload = function(event)
+						{
+							editor.graph.getModel().clear();
+							var xmlString = reader.result;
+							var doc = mxUtils.parseXml(xmlString);
+							var codec = new mxCodec(doc);
+							codec.decode(doc.documentElement, editor.graph.getModel());
+							populateOverlays();
+						}
+						reader.readAsText(file);
+					}
+				}
+				fileInputDialog.click();
+			}
+
+			// export dialog function
+			var exportDialog = function()
+			{
+				var tb = document.createElement('div');
+				var wnd = new mxWindow('Export Dialog', tb, 100, 100, 200, null, true, true);
+				wnd.setVisible(true);
 			}
 
 			// binding actions
@@ -443,6 +462,9 @@
 			editor.addAction('exportSvg', exportSvg);
 			editor.addAction('exportImage', exportImage);
 			editor.addAction('new', newDoc);
+			editor.addAction('open', openDialog);
+			editor.addAction('save', saveDialog);
+			editor.addAction('exportWindow', exportDialog);
 
 			for (var i = 0; i < buttons.length; i++)
 			{
@@ -1458,7 +1480,7 @@
 						if (typeof geoCompare != "undefined"){
 							stringRectangleGeo.x = farRightX + 40;
 						} else {
-							stringRectangleGeo.x = firstEllipseGeo.x + firstEllipseGeo.width + 40;
+							stringRectangleGeo.x = firstEllipse.geometry.x + firstEllipse.geometry.width + 40;
 						}
 						editor.graph.model.setGeometry(stringRectangle, stringRectangleGeo);
 
@@ -2547,5 +2569,6 @@
 		<div id="zoomActions" style="width:95%;padding-left:54px;padding-top:4px;">
 		</div>
 	</div>
+	<input id="file-input" type="file" accept=".xml" name="name" style="display: none;" />
 </body>
 </html>
