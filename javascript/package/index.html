@@ -4,9 +4,9 @@
  	<link rel="stylesheet" href="css/wordpress.css" type="text/css" media="screen" />
 	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 	<script type="text/javascript">
-		var mxBasePath = '../../src';
+		var mxBasePath = '../src';
 	</script>
-	<script type="text/javascript" src="../../src/js/mxClient.js"></script>
+	<script type="text/javascript" src="../src/js/mxClient.js"></script>
 	<script type="text/javascript" src="js/app.js"></script>
 	<script src="https://cdn.jsdelivr.net/npm/canvg/dist/browser/canvg.min.js"></script>
 	<script type="text/javascript">
@@ -56,7 +56,7 @@
    			var width = e.target.outerWidth;
    			var height = e.target.outerHeight;
 				graphContainer.style.width = width*0.95 - graphToolbar.getBoundingClientRect().width;
-				graphContainer.stlye.height = height*0.95 - document.getElementById('header').getBoundingClientRect().height - document.getElementById('mainActions').getBoundingClientRect().height - document.getElementById('zoomActions').getBoundingClientRect().height;
+				graphContainer.style.height = height*0.95 - document.getElementById('header').getBoundingClientRect().height - document.getElementById('mainActions').getBoundingClientRect().height - document.getElementById('zoomActions').getBoundingClientRect().height;
 			}
 			window.addEventListener("resize", onresize);
 
