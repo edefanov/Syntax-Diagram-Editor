@@ -46,6 +46,20 @@
 			//var title = document.getElementById('title');
 			//title.innerHTML = 'Syntax Diagram Editor'
 
+			var graphContainer = document.getElementById('graph');
+			var graphToolbar = document.getElementById('toolbar');
+			graphContainer.style.width = document.body.clientWidth*0.95 - graphToolbar.getBoundingClientRect().width;
+			graphContainer.style.height = document.body.clientHeight*0.95 - document.getElementById('header').getBoundingClientRect().height - document.getElementById('mainActions').getBoundingClientRect().height - document.getElementById('zoomActions').getBoundingClientRect().height;
+
+			var onresize = function(e) {
+   			//note i need to pass the event as an argument to the function
+   			var width = e.target.outerWidth;
+   			var height = e.target.outerHeight;
+				graphContainer.style.width = width*0.95 - graphToolbar.getBoundingClientRect().width;
+				graphContainer.stlye.height = height*0.95 - document.getElementById('header').getBoundingClientRect().height - document.getElementById('mainActions').getBoundingClientRect().height - document.getElementById('zoomActions').getBoundingClientRect().height;
+			}
+			window.addEventListener("resize", onresize);
+
 		    // Changes the zoom on mouseWheel events
 		  mxEvent.addMouseWheelListener(function (evt, up)
 		  {
@@ -416,6 +430,11 @@
 			var newDoc = function()
 			{
 				window.open(window.location.href, '_blank');
+			}
+
+			var saveDialog = function()
+			{
+
 			}
 
 			// binding actions
@@ -2503,16 +2522,13 @@
 		<div id="mainActions"
 			style="width:95%;padding-top:8px;padding-left:12px;padding-bottom:8px;">
 		</div>
-		<div id="selectActions" style="width:95%;padding-left:54px;padding-bottom:4px;">
-		</div>
-		<div style="padding-left:12px;width:100%;">
-		<table id="table" border="1" width='95%' height='88%'>
+		<table id="table" border="1" width='95%' height='88%' style='overflow:hidden;margin-left:12px;margin-right:12px'>
 			<tr>
 				<td id="toolbar" style="width:5%;padding-left:20px;" valign="top"> <br>
 					<!-- Toolbar Here -->
 				</td>
-				<td id="graphTd" valign="top" style="width:95%;" >
-					<div id="graph" tabindex="-1" style="position:relative;height:100%;width:100%;overflow:hidden;cursor:default;">
+				<td id="graphTd" valign="top" style="overflow:hidden;" >
+					<div id="graph" style="overflow:hidden;cursor:default;position:relative;">
 						<!-- Graph Here -->
 						<center id="splash" style="padding-top:230px;">
 							<img src="images/loading.gif">
@@ -2522,7 +2538,6 @@
 				</td>
 			</tr>
 		</table>
-		</div>
 		<span style="float:right;padding-right:12px;">
 			<input id="overlayToggle" type="checkbox"/>Controls
 		</span>
