@@ -187,6 +187,33 @@ a:hover {
 	font-style: normal;
 	text-transform: capitalize;
 	}
+
+	.tb_buttons{
+	border:1px solid #d7dada; -webkit-border-radius: 2px; -moz-border-radius: 2px;border-radius: 2px;font-size:12px;font-family:arial, helvetica, sans-serif; padding: 6px 6px 6px 6px; text-decoration:none; display:inline-block;text-shadow: 0px 0px 0 rgba(0,0,0,0.3);font-weight:bold; color: #4A4A4A;
+	 background-color: #f4f5f5; background-image: -webkit-gradient(linear, left top, left bottom, from(#f4f5f5), to(#F0EEEE));
+	 background-image: -webkit-linear-gradient(top, #f4f5f5, #F0EEEE);
+	 background-image: -moz-linear-gradient(top, #f4f5f5, #F0EEEE);
+	 background-image: -ms-linear-gradient(top, #f4f5f5, #F0EEEE);
+	 background-image: -o-linear-gradient(top, #f4f5f5, #F0EEEE);
+	 background-image: linear-gradient(to bottom, #f4f5f5, #F0EEEE);filter:progid:DXImageTransform.Microsoft.gradient(GradientType=0,startColorstr=#f4f5f5, endColorstr=#F0EEEE);
+	}
+
+	.tb_buttons:hover{
+	 border:1px solid #bfc4c4;
+	 background-color: #D9DDDD; background-image: -webkit-gradient(linear, left top, left bottom, from(#D9DDDD), to(#D8D3D3));
+	 background-image: -webkit-linear-gradient(top, #D9DDDD, #D8D3D3);
+	 background-image: -moz-linear-gradient(top, #D9DDDD, #D8D3D3);
+	 background-image: -ms-linear-gradient(top, #D9DDDD, #D8D3D3);
+	 background-image: -o-linear-gradient(top, #D9DDDD, #D8D3D3);
+	 background-image: linear-gradient(to bottom, #D9DDDD, #D8D3D3);filter:progid:DXImageTransform.Microsoft.gradient(GradientType=0,startColorstr=#D9DDDD, endColorstr=#D8D3D3);
+	}
+
+	.vl {
+	  border-left: 3px solid #eaeaea;
+	  height: 100%;
+		display:inline;
+	}
+
 /* End Typography & Colors */
 
 

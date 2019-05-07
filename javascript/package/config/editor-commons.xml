@@ -9,6 +9,15 @@
 		<separator/>
 		<add as="delete" action="delete" icon="images/delete.gif" if="cell"/>
 		<separator/>
+		<add as="newCont" action="addNewContainer"/>
+		<add as="controlToggle" action="popupOverlayToggle"/>
+		<add as="zoomControl">
+			<add as="zoomIn" action="zoomIn"/>
+			<add as="zoomOut" action="zoomOut"/>
+			<add as="zoomAct" action="actualSize"/>
+			<add as="zoomFit" action="fit"/>
+		</add>
+		<separator/>
 		<add as="exitGroup" action="exitGroup" icon="images/up.gif" if="notRoot"/>
 		<add as="enterGroup" action="enterGroup" icon="images/down.gif" if="validRoot"/>
 		<separator/>

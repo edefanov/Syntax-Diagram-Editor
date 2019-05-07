@@ -49,15 +49,16 @@
 
 			var graphContainer = document.getElementById('graph');
 			var graphToolbar = document.getElementById('toolbar');
-			graphContainer.style.width = document.body.clientWidth*0.95 - graphToolbar.getBoundingClientRect().width;
-			graphContainer.style.height = document.body.clientHeight*0.95 - document.getElementById('header').getBoundingClientRect().height - document.getElementById('mainActions').getBoundingClientRect().height - document.getElementById('zoomActions').getBoundingClientRect().height;
+			graphContainer.style.width = window.innerWidth*0.95 - graphToolbar.getBoundingClientRect().width;
+			graphContainer.style.height = window.innerHeight*0.95 - document.getElementById('header').getBoundingClientRect().height - 28 - document.getElementById('mainActions').getBoundingClientRect().height - document.getElementById('zoomActions').getBoundingClientRect().height - document.getElementById('source').getBoundingClientRect().height;
+			console.log(window.innerHeight);
 
 			var onresize = function(e) {
    			//note i need to pass the event as an argument to the function
    			var width = e.target.outerWidth;
    			var height = e.target.outerHeight;
-				graphContainer.style.width = width*0.95 - graphToolbar.getBoundingClientRect().width;
-				graphContainer.style.height = height*0.95 - document.getElementById('header').getBoundingClientRect().height - document.getElementById('mainActions').getBoundingClientRect().height - document.getElementById('zoomActions').getBoundingClientRect().height;
+				graphContainer.style.width = window.innerWidth*0.95 - graphToolbar.getBoundingClientRect().width;
+				graphContainer.style.height = window.innerHeight*0.95 - document.getElementById('header').getBoundingClientRect().height - document.getElementById('mainActions').getBoundingClientRect().height - document.getElementById('zoomActions').getBoundingClientRect().height;
 			}
 			window.addEventListener("resize", onresize);
 
@@ -234,96 +235,110 @@
 				editor.execute('toggleOverlay');
 			});
 
+			// overlay toggle wrapper for context pop up
+			var popupOverlayToggle = function()
+			{
+				if (overlayInput.checked)
+				{
+					overlayInput.checked = false;
+				} else {
+					overlayInput.checked = true;
+				}
+				editor.execute('toggleOverlay');
+			}
+
+			editor.addAction('popupOverlayToggle', popupOverlayToggle);
+
 
 			// Create select actions in page
 			var node = document.getElementById('mainActions');
 			var buttons = ['new', 'open', 'savelocal', 'save', 'cut', 'copy', 'paste', 'delete', 'undo', 'redo', 'print'];
 
-			// Client-side code for image export
-			var exportImage = function(editor)
-			{
-				overlayInput.checked = false;
-				toggleOverlay(editor);
-				var graph = editor.graph;
-				var scale = graph.view.scale;
-				var bounds = graph.getGraphBounds();
-				editor.graph.refresh();
-				var documentGraph = mxUtils.show(editor.graph, 'new', 0, 0, bounds.width, bounds.height);
-				var svg1 = new XMLSerializer().serializeToString(documentGraph);
-				var SVGCode = svg1.substring(
-					svg1.indexOf("<svg"),
-			    svg1.indexOf("</svg>")+6
-				);
-				var canvas = document.createElement('canvas');
-				canvas.width = bounds.width;
-				canvas.height = bounds.height;
-				canvas.style.width = bounds.width;
-				canvas.style.height = bounds.height;
-				canvg(canvas, SVGCode, {userCORS: true, ignoreDimensions: true});
-				var dataURL = canvas.toDataURL('image/png');
-				var data = atob(dataURL.substring('data:image/png;base64,'.length)),
-    			asArray = new Uint8Array(data.length);
-				for (var i = 0, len = data.length; i < len; ++i) {
-  					asArray[i] = data.charCodeAt(i);
-				}
-				var pngBlob = new Blob([asArray.buffer], {type: 'image/png'});
-				var pngUrl = URL.createObjectURL(pngBlob);
-				var downloadLink = document.createElement("a");
-				downloadLink.href = pngUrl;
-				do {
-					var fileName = prompt("PNG File Name", "enter here");
-					if (fileName.indexOf('.png') == -1) {
-						fileName = fileName + '.png';
-					}
-				} while (fileName.length > 255 || fileName.length <= 0);
-				downloadLink.download = fileName;
-				document.body.appendChild(downloadLink);
-				downloadLink.click();
-				document.body.removeChild(downloadLink);
-				overlayInput.checked = true;
-				toggleOverlay(editor);
+			// // Client-side code for image export
+			// var exportImage = function(editor)
+			// {
+			// 	overlayInput.checked = false;
+			// 	toggleOverlay(editor);
+			// 	var graph = editor.graph;
+			// 	var scale = graph.view.scale;
+			// 	var bounds = graph.getGraphBounds();
+			// 	editor.graph.refresh();
+			// 	var documentGraph = mxUtils.show(editor.graph, 'new', 0, 0, bounds.width, bounds.height);
+			// 	var svg1 = new XMLSerializer().serializeToString(documentGraph);
+			// 	var SVGCode = svg1.substring(
+			// 		svg1.indexOf("<svg"),
+			//     svg1.indexOf("</svg>")+6
+			// 	);
+			// 	var canvas = document.createElement('canvas');
+			// 	canvas.width = bounds.width;
+			// 	canvas.height = bounds.height;
+			// 	canvas.style.width = bounds.width;
+			// 	canvas.style.height = bounds.height;
+			// 	canvg(canvas, SVGCode, {userCORS: true, ignoreDimensions: true});
+			// 	var dataURL = canvas.toDataURL('image/png');
+			// 	var data = atob(dataURL.substring('data:image/png;base64,'.length)),
+    	// 		asArray = new Uint8Array(data.length);
+			// 	for (var i = 0, len = data.length; i < len; ++i) {
+  		// 			asArray[i] = data.charCodeAt(i);
+			// 	}
+			// 	var pngBlob = new Blob([asArray.buffer], {type: 'image/png'});
+			// 	var pngUrl = URL.createObjectURL(pngBlob);
+			// 	var downloadLink = document.createElement("a");
+			// 	downloadLink.href = pngUrl;
+			// 	do {
+			// 		var fileName = prompt("PNG File Name", "enter here");
+			// 		if (fileName.indexOf('.png') == -1) {
+			// 			fileName = fileName + '.png';
+			// 		}
+			// 	} while (fileName.length > 255 || fileName.length <= 0);
+			// 	downloadLink.download = fileName;
+			// 	document.body.appendChild(downloadLink);
+			// 	downloadLink.click();
+			// 	document.body.removeChild(downloadLink);
+			// 	overlayInput.checked = true;
+			// 	toggleOverlay(editor);
+			//
+			// };
+			//
+			// // Client-side code for SVG export
+			// var exportSvg = function(editor)
+			// {
+			// 	overlayInput.checked = false;
+			// 	toggleOverlay(editor);
+			// 	var graph = editor.graph;
+			// 	var scale = graph.view.scale;
+			// 	var bounds = graph.getGraphBounds();
+			//
+			// 	var documentGraph = mxUtils.show(editor.graph, 'new', 10, 10);
+			// 	var svg1 = new XMLSerializer().serializeToString(documentGraph);
+			// 	var SVGCode = svg1.substring(
+			// 		svg1.indexOf("<svg"),
+			//     svg1.indexOf("</svg>")+6
+			// 	);
+			// 	var svgBlob = new Blob([SVGCode], {type:"image/svg+xml;charset=utf-8"});
+			// 	var svgUrl = URL.createObjectURL(svgBlob);
+			// 	var downloadLink = document.createElement("a");
+			// 	downloadLink.href = svgUrl;
+			// 	do {
+			// 		var fileName = prompt("SVG File Name", "enter here");
+			// 		if (fileName.indexOf('.svg') == -1) {
+			// 			fileName = fileName + '.svg';
+			// 		}
+			// 	} while (fileName.length > 255 || fileName.length <= 0);
+			// 	downloadLink.download = fileName;
+			// 	document.body.appendChild(downloadLink);
+			// 	downloadLink.click();
+			// 	document.body.removeChild(downloadLink);
+			// 	overlayInput.checked = true;
+			// 	toggleOverlay(editor);
+			//
+			//
+			//
+			// 	//new mxXmlRequest(editor.urlEcho, 'filename=' + name + '&format=svg' + '&xml=' + xml).simulate(document, "_blank");
+			// };
 
-			};
-
-			// Client-side code for SVG export
-			var exportSvg = function(editor)
-			{
-				overlayInput.checked = false;
-				toggleOverlay(editor);
-				var graph = editor.graph;
-				var scale = graph.view.scale;
-				var bounds = graph.getGraphBounds();
-
-				var documentGraph = mxUtils.show(editor.graph, 'new', 10, 10);
-				var svg1 = new XMLSerializer().serializeToString(documentGraph);
-				var SVGCode = svg1.substring(
-					svg1.indexOf("<svg"),
-			    svg1.indexOf("</svg>")+6
-				);
-				var svgBlob = new Blob([SVGCode], {type:"image/svg+xml;charset=utf-8"});
-				var svgUrl = URL.createObjectURL(svgBlob);
-				var downloadLink = document.createElement("a");
-				downloadLink.href = svgUrl;
-				do {
-					var fileName = prompt("SVG File Name", "enter here");
-					if (fileName.indexOf('.svg') == -1) {
-						fileName = fileName + '.svg';
-					}
-				} while (fileName.length > 255 || fileName.length <= 0);
-				downloadLink.download = fileName;
-				document.body.appendChild(downloadLink);
-				downloadLink.click();
-				document.body.removeChild(downloadLink);
-				overlayInput.checked = true;
-				toggleOverlay(editor);
-
-
-
-				//new mxXmlRequest(editor.urlEcho, 'filename=' + name + '&format=svg' + '&xml=' + xml).simulate(document, "_blank");
-			};
-
-			buttons.push('exportImage');
-			buttons.push('exportSvg');
+			// buttons.push('exportImage');
+			// buttons.push('exportSvg');
 
 			// add openlocal if there is a state in localstorage
 			if (localStorage.getItem('state') != null)
@@ -404,8 +419,8 @@
 				fileInputDialog.click();
 			}
 
-			var exportDlg = null;
 			// export dialog function
+			var exportDlg = null;
 			var exportDialog = function()
 			{
 				if (exportDlg)
@@ -560,8 +575,8 @@
 			// binding actions
 			editor.addAction('openlocal', loadFromLocal);
 			editor.addAction('savelocal', saveToLocal);
-			editor.addAction('exportSvg', exportSvg);
-			editor.addAction('exportImage', exportImage);
+			// editor.addAction('exportSvg', exportSvg);
+			// editor.addAction('exportImage', exportImage);
 			editor.addAction('new', newDoc);
 			editor.addAction('open', openDialog);
 			editor.addAction('save', saveDialog);
@@ -571,6 +586,7 @@
 			{
 				var button = document.createElement('button');
 				button.id = buttons[i];
+				button.className = 'tb_buttons';
 				mxUtils.write(button, mxResources.get(buttons[i]));
 				var factory = function(name)
 				{
@@ -581,6 +597,9 @@
 				};
 
 				mxEvent.addListener(button, 'click', factory(buttons[i]));
+				if (button.id =='cut') {
+					button.style = 'margin-left:12px';
+				}
 				node.appendChild(button);
 			}
 
@@ -786,15 +805,15 @@
 									dots.unshift(vertO);
 
 
-									var html = `<table height=100%> <tr> <td> <span id='vertTip'> Select the first (start) point </span> </td></tr><tr><td> <button style="float:bottom" id='closeBtn' style='align:right'>Cancel</button> </td></tr></table> `
+									var html = `<table height=100%> <tr> <td> <span id='vertTip'> Select the first (start) point </span> </td></tr><tr><td id='ctrlCluster'> <button style="float:bottom" id='closeBtn' style='align:right'>Cancel</button> </td></tr></table> `
 									var tb = document.createElement('div');
 									tb.innerHTML = html;
-									wnd = new mxWindow('Tip', tb, document.getElementById('graphTd').getBoundingClientRect().right-250, document.getElementById('graphTd').getBoundingClientRect().bottom-100, 250, 100, false, true);
+									wnd = new mxWindow('Tip', tb, me.getX(), me.getY(), 250, undefined, false, true);
 									wnd.setLocation = function(x, y)
-									{
-									  x = Math.max(0, x);
-									  y = Math.max(0, y);
-									  mxWindow.prototype.setLocation.apply(this, arguments);
+									 {
+									   x = me.getX();
+									   y = me.getY();
+									   mxWindow.prototype.setLocation.apply(this, arguments);
 									};
 
 									// on "cancel" press go through the cells and delete the dots
@@ -839,6 +858,36 @@
 										document.getElementById('vertTip').innerHTML = 'Select the second (end) point'
 									}
 
+
+									// // if the same point was chosen twice ask which way user wants the loop to flow
+									// var samePoint = false;
+									// if (clickedOn.length ==4 && clickedOn[0] == clickedOn[2] && clickedOn[1] == clickedOn[3])
+									// {
+									// 	samePoint = true;
+									// 	document.getElementById('vertTip').innerHTML = 'Select which way you want the loop to flow';
+									// 	clickedOn.length = 3;
+									// 	document.getElementById('ctrlCluster').innerHTML = `<input type="radio" name="dire" value="0" checked="checked">Left</input>
+									// 																											<input type="radio" style='margin-left:6px' name="dire" value="1" >Right</input> <br>
+									// 																											<button id='direSelect'>Confirm</button>` + document.getElementById('ctrlCluster').innerHTML;
+									// 	document.getElementById('direSelect').onclick = function()
+									// 	{
+									// 		if (document.querySelector('input[name="dire"]:checked').value == 0) {
+									// 			clickedOn[0] = clickedOn[0] + 8;
+									// 			clickedOn[2] = clickedOn[2] - 8;
+									// 		} else {
+									// 			clickedOn[0] = clickedOn[0] - 8;
+									// 			clickedOn[2] = clickedOn[2] + 8;
+									// 		}
+									// 		clickedOn.push(clickedOn[1]);
+									// 	}
+									// }
+									//
+									// console.log('event in progress');
+									// if (clickedOn.length == 6)
+									// {
+									// 	console.log(clickedOn);
+									// 	clickedOn.length = 4;
+									// }
 									// if the end point is chosen remove all dots and add the lines
 									if (clickedOn.length == 4)
 									{
@@ -892,18 +941,19 @@
 											clickedOn[2] = tmp;
 										}
 
+										var pointOffset = 30;
 										// left line
 										var cellE = new mxCell('edge', new mxGeometry(0, 0, 50, 50), 'curved=0;endArrow=classic;html=1;');
 										if (specialCase == 0)
 										{
 											cellE.geometry.setTerminalPoint(new mxPoint(clickedOn[0], clickedOn[1]), true);
-											cellE.geometry.setTerminalPoint(new mxPoint(clickedOn[0]+30, setY), false);
+											cellE.geometry.setTerminalPoint(new mxPoint(clickedOn[0]+pointOffset, setY), false);
 										} else if (specialCase == 1) {
 											cellE.geometry.setTerminalPoint(new mxPoint(clickedOn[0], clickedOn[1]), true);
-											cellE.geometry.setTerminalPoint(new mxPoint(clickedOn[0]+30, setY), false);
+											cellE.geometry.setTerminalPoint(new mxPoint(clickedOn[0]+pointOffset, setY), false);
 										} else if (specialCase == 2) {
 											cellE.geometry.setTerminalPoint(new mxPoint(clickedOn[0], clickedOn[1]), false);
-											cellE.geometry.setTerminalPoint(new mxPoint(clickedOn[0]+30, setY), true);
+											cellE.geometry.setTerminalPoint(new mxPoint(clickedOn[0]+pointOffset, setY), true);
 											cellE.setStyle('curved=0;endArrow=none;html=1;')
 										}
 										cellE.edge = true;
@@ -914,13 +964,13 @@
 										var cellE2 = new mxCell('edge', new mxGeometry(0, 0, 50, 50), 'curved=0;endArrow=classic;html=1;');
 										if (specialCase == 0)
 										{
-											cellE2.geometry.setTerminalPoint(new mxPoint(clickedOn[2]-30, setY), true);
+											cellE2.geometry.setTerminalPoint(new mxPoint(clickedOn[2]-pointOffset, setY), true);
 											cellE2.geometry.setTerminalPoint(new mxPoint(clickedOn[2], clickedOn[3]), false);
 										} else if (specialCase == 1) {
-											cellE2.geometry.setTerminalPoint(new mxPoint(clickedOn[2]-30, setY), false);
+											cellE2.geometry.setTerminalPoint(new mxPoint(clickedOn[2]-pointOffset, setY), false);
 											cellE2.geometry.setTerminalPoint(new mxPoint(clickedOn[2], clickedOn[3]), true);
 										} else if (specialCase == 2) {
-											cellE2.geometry.setTerminalPoint(new mxPoint(clickedOn[2]-30, setY), false);
+											cellE2.geometry.setTerminalPoint(new mxPoint(clickedOn[2]-pointOffset, setY), false);
 											cellE2.geometry.setTerminalPoint(new mxPoint(clickedOn[2], clickedOn[3]), true);
 										}
 										cellE2.edge = true;
@@ -931,14 +981,14 @@
 										var cellE3 = new mxCell('edge', new mxGeometry(0, 0, 50, 50), 'curved=0;endArrow=classic;html=1;');
 										if (specialCase == 0)
 										{
-											cellE3.geometry.setTerminalPoint(new mxPoint(clickedOn[0]+30, setY), true);
-											cellE3.geometry.setTerminalPoint(new mxPoint(clickedOn[2]-30, setY), false);
+											cellE3.geometry.setTerminalPoint(new mxPoint(clickedOn[0]+pointOffset, setY), true);
+											cellE3.geometry.setTerminalPoint(new mxPoint(clickedOn[2]-pointOffset, setY), false);
 										} else if (specialCase == 1) {
-											cellE3.geometry.setTerminalPoint(new mxPoint(clickedOn[0]+30, setY), true);
-											cellE3.geometry.setTerminalPoint(new mxPoint(clickedOn[2]-30, setY), false);
+											cellE3.geometry.setTerminalPoint(new mxPoint(clickedOn[0]+pointOffset, setY), true);
+											cellE3.geometry.setTerminalPoint(new mxPoint(clickedOn[2]-pointOffset, setY), false);
 										} else if (specialCase == 2) {
-											cellE3.geometry.setTerminalPoint(new mxPoint(clickedOn[0]+30, setY), false);
-											cellE3.geometry.setTerminalPoint(new mxPoint(clickedOn[2]-30, setY), true);
+											cellE3.geometry.setTerminalPoint(new mxPoint(clickedOn[0]+pointOffset, setY), false);
+											cellE3.geometry.setTerminalPoint(new mxPoint(clickedOn[2]-pointOffset, setY), true);
 										}
 										cellE3.edge = true;
 										cellE3 = editor.graph.addCell(cellE3, ellipseEdge);
@@ -1465,13 +1515,15 @@
 					// !!!DONE!!! add vertical elements editing
 					// !!!DONE!!! image saving
 					// !!!DONE!!! image saving through a pop up window
-					// fix vertical functionality (single source/target and target<source)
+					// !!!KIND OF DONE!!! fix vertical functionality (single source/target and target<source)
 					// !!!DONE!!! xml saving
 					// !!!DONE!!! redo gui
 					// !!!DONE!!! rectangle width based on text width
 					// !!!DONE!!! add overlays processing to xml opening
 					// !!!DONE!!! implement local storage
 					// !!!DONE!!! file ierarchy and dependencies cleanup
+					// !!!DONE!!! top toolbar images
+					// !!!DONE!!! context menu add new container, zoom control and controls toggle
 					editor.graph.refresh();
 			}
 		})
@@ -2005,12 +2057,12 @@
 								var html = `<table height=100%> <tr> <td> <span id='vertTip'> Select the first (start) point </span> </td></tr><tr><td> <button style="float:bottom" id='closeBtn' style='align:right'>Cancel</button> </td></tr></table> `
 								var tb = document.createElement('div');
 								tb.innerHTML = html;
-								wnd = new mxWindow('Tip', tb, document.getElementById('graphTd').getBoundingClientRect().right-250, document.getElementById('graphTd').getBoundingClientRect().bottom-100, 250, 100, false, true);
+								wnd = new mxWindow('Tip', tb, me.getX(), me.getY(), 250, undefined, false, true);
 								wnd.setLocation = function(x, y)
-								{
-									x = Math.max(0, x);
-									y = Math.max(0, y);
-									mxWindow.prototype.setLocation.apply(this, arguments);
+								 {
+									 x = me.getX();
+									 y = me.getY();
+									 mxWindow.prototype.setLocation.apply(this, arguments);
 								};
 
 								// on "cancel" press go through the cells and delete the dots
@@ -2661,10 +2713,10 @@
 				</td>
 			</tr>
 		</table>
-		<span style="float:right;padding-right:12px;">
+		<span style="float:left;padding-left:12px;">
 			<input id="overlayToggle" type="checkbox"/>Controls
 		</span>
-		<span style="float:right;padding-right:12px;">
+		<span style="float:left;padding-right:12px;">
 			<input id="source" type="checkbox"/>Source
 		</span>
 		<div id="zoomActions" style="width:95%;padding-left:54px;padding-top:4px;">
