@@ -1,14 +1,81 @@
-<html>
+<!DOCTYPE html>
+<html lang="en">
+
 <head>
-	<title>redirecting</title>
-		<meta http-equiv="refresh" content="0;javascript/package/index.html">
+
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+  <title>Syntax Diagram Editor</title>
+
+  <!-- Bootstrap core CSS -->
+
+  <!-- Custom fonts for this template -->
+  <link href="https://fonts.googleapis.com/css?family=Saira+Extra+Condensed:500,700" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css?family=Muli:400,400i,800,800i" rel="stylesheet">
+
+  <!-- Custom styles for this template -->
+  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+
 </head>
-<body>
-<br/>
-<center>
-	<h1>
-		redirecting...
-	</h1>
-</center>
+
+<body id="page-top">
+
+
+  <div class="container-fluid p-0">
+
+    <section class="resume-section p-3 p-lg-5 d-flex align-items-center" id="about">
+      <div class="w-100">
+        <h1 class="mb-0">Редактор синтаксических диаграмм
+        </h1>
+      </div>
+			<a href="javascript/package/index.html" class="btn btn-primary btn-lg">Открыть редактор</a>
+    </section>
+
+    <hr class="m-0">
+
+    <section class="p-3 p-lg-5 d-flex justify-content-center" id="experience">
+      <div class="w-100">
+        <h2 class="mb-5">Краткое рукодство по использованию</h2>
+
+        <div class="d-flex flex-column flex-md-row justify-content-between mb-5">
+          <div>
+            <p>Для добавления новых нетерминалов в диаграмму необходимо нажать правой кнопкой на рабочем пространстве и выбрать пункт "Add Non-Terminal"</p>
+						<img src="https://i.imgur.com/lP3BBdq.png"></img>
+						<br><br>
+						<p>Далее работа осуществляется путем нажатия кнопок управления на самой диаграмме - иконки с плюсами.</p>
+						<p>Нажатие иконки с плюсом, расположенной на линии, позволяет добавлять новые элементы на эту линию - если название элемента совпадает с названием существующего нетерминала, то стиль добавляемого элемента изменится - прямоугольник будет без скругленных краев</p>
+						<img src="https://i.imgur.com/6FiFzY8.png"></img>
+						<p>Нажатие иконки с плюсом, расположенной ниже нетерминала, позволяет расширять диаграмму по вертикали. После нажатия на эту кнопку пользователю предлагается выбор начальной и конечной точки расположения новой линии на диаграмме</p>
+						<img src="https://i.imgur.com/LJ8XlKK.png"></img>
+						<p>Выбор осуществляется нажатием на большие круги с черными краями. После выбора точек начала и конца диаграмма расширится по вертикали - высота линии подбирается автоматически таким образом, чтобы линии не пересекали друг друга</p>
+						<p>На вновь созданную линию так же можно добавлять новые элементы путем нажатия на соответствующую иконку с плюсом - линия увеличится в длине, если места под добавляемый элемент не хватает</p>
+						<img src="https://i.imgur.com/vS9BnBU.png"></img>
+
+
+					</div>
+        </div>
+
+				<div class="resume-item d-flex flex-column flex-md-row justify-content-between mb-5">
+          <div class="resume-content">
+            <p>Элементы управления можно выключить, нажав правой кнопкой на рабочей и области и выбрав пункт "Toggle Controls", и включить обратно, нажав на "Toggle Controls" еще раз</p>
+						<img src="https://i.imgur.com/sfQZzP4.png"></img>
+						<p>Приложение поддерживает сохранение (кнопка Save As) и открытие (кнопка Open) файлов в собственном формате (используется xml контейнер), а так же экспорт диаграмм (кнопка Export) в <strong>JPG</strong>, <strong>PNG</strong>, <strong>SVG</strong>, <strong>BMP</strong></p>
+						<p>Диаграммы можно сохранять в local storage - для этого необходимо нажать Save State, а для открытия диаграммы из local storage (если диаграмма там сохранена) необходимо нажать кнопку Retrieve State - возможно, придется обновить страницу, чтобы кнопка появилась - при отсутствии сохраненной диаграммы в local storage кнопка не появляется</p>
+						<p>Элементы в диаграмме можно двигать и удалять, а так же добавлять различные нестандартные элементы из тулбара слева, однако я не могу гарантировать корректной работы автоматических систем приложения, если пользователь сильно меняет структуру существующей созданной приложением диаграммы.</p>
+						<img src="https://i.imgur.com/xgJCp8O.png"></img>
+					</div>
+        </div>
+				<a href="javascript/package/index.html" class="btn btn-primary btn-lg btn-block">Открыть редактор</a>
+				</section>
+
+
+  </div>
+
+	<script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
+	    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js" integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1" crossorigin="anonymous"></script>
+	    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js" integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous"></script>
+
 </body>
+
 </html>

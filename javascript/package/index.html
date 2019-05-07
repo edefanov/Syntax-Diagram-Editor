@@ -67,11 +67,11 @@
 		  {
 			    if (!mxEvent.isConsumed(evt))
 			    {
-			    	if (up)
+			    	if (up && document.getElementById('source').checked==false)
 					{
 			    		editor.execute('zoomIn');
 					}
-					else
+					else if (document.getElementById('source').checked==false)
 					{
 						editor.execute('zoomOut');
 					}
@@ -472,10 +472,12 @@
 				var submitButton = document.getElementById('exportBtn');
 				submitButton.onclick = function()
 				{
+					console.log('onclick');
 					var fileFormat = document.getElementById('fileFormat').value;
 					var fileName = document.getElementById('fileName').value;
-					if (fileName < 255 && fileName > 0)
+					if (fileName.length < 255 && fileName.length > 0)
 					{
+						console.log('filename got');
 						overlayInput.checked = false;
 						toggleOverlay(editor);
 						var graph = editor.graph;
@@ -505,8 +507,6 @@
 							var canvas = document.createElement('canvas');
 							canvas.width = bounds.width;
 							canvas.height = bounds.height;
-							canvas.style.width = bounds.width;
-							canvas.style.height = bounds.height;
 							console.log(canvas);
 							canvg(canvas, SVGCode, {userCORS: true, ignoreDimensions: true});
 							var dataURL = canvas.toDataURL('image/png');
@@ -645,14 +645,25 @@
 					var x = 0;
 					var index = cellList + 1;
 
+					// adding a container
+
+					var template = editor.templates['container'];
+					var clone = editor.graph.model.cloneCell(template);
+					var cloneGeo = clone.getGeometry();
+					cloneGeo.y = y;
+					cloneGeo.height = 100;
+					editor.graph.model.setGeometry(clone, cloneGeo);
+					clone.setAttribute('label', label);
+					var newContainer = editor.graph.model.add(parent, clone, index);
+					editor.graph.scrollCellToVisible(newContainer);
+
 					// refreshing the existing elements if we add a new non-terminal
 					var coincd1 = 0
 					var containerList = editor.graph.getChildCells(parent);
 					var variables = nonTerminalsList();
-					console.log(variables);
 					for (i = 0; i < containerList.length; i++) {
 						if (containerList[i].style == 'swimlane') {
-							var containerChildren = editor.graph.model.getChildren(containerList[i]);
+							var containerChildren = editor.graph.model.getChildCells(containerList[i]);
 							for (z = 0; z < containerChildren.length; z++) {
 								var cellType = containerChildren[z].getValue();
 								if (cellType.tagName == 'Roundrect') {
@@ -670,19 +681,6 @@
 							}
 						}
 					}
-
-
-					// adding a container
-
-					var template = editor.templates['container'];
-					var clone = editor.graph.model.cloneCell(template);
-					var cloneGeo = clone.getGeometry();
-					cloneGeo.y = y;
-					cloneGeo.height = 100;
-					editor.graph.model.setGeometry(clone, cloneGeo);
-					clone.setAttribute('label', label);
-					var newContainer = editor.graph.model.add(parent, clone, index);
-					editor.graph.scrollCellToVisible(newContainer);
 
 					// adding ellipses
 
