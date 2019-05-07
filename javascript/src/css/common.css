@@ -26,10 +26,10 @@ div.mxRubberband {
 	margin: 0px;
 }
 div.mxWindow {
-	-webkit-box-shadow: 3px 3px 12px #C0C0C0;
-	-moz-box-shadow: 3px 3px 12px #C0C0C0;
-	box-shadow: 3px 3px 12px #C0C0C0;
-	background: url('../images/window.gif');
+	-webkit-box-shadow: 2px 2px 2px #C0C0C0;
+	-moz-box-shadow: 2px 2px 2px #C0C0C0;
+	box-shadow: 2px 2px 2px #C0C0C0;
+	background: #FFFFFF;
 	border:1px solid #c3c3c3;
 	position: absolute;
 	overflow: hidden;
@@ -42,13 +42,16 @@ table.mxWindow {
 	font-size: 8pt;
 }
 td.mxWindowTitle {
-	background: url('../images/window-title.gif') repeat-x;
+	background: #FFFFFF;
+	border-color: #f5f5f5;
+	border-width: 2px;
 	text-overflow: ellipsis;
 	white-space: nowrap;
  	text-align: center;
  	font-weight: bold;
+	font-size: 12pt;
  	overflow: hidden;
-	height: 13px;
+	height: 15px;
 	padding: 2px;
  	padding-top: 4px;
  	padding-bottom: 6px;
@@ -64,21 +67,44 @@ div.mxWindowPane {
 }
 td.mxWindowPane td {
   	font-family: Arial;
-	font-size: 8pt;
+	font-size: 10pt;
 }
 td.mxWindowPane input, td.mxWindowPane select, td.mxWindowPane textarea, td.mxWindowPane radio {
   	border-color: #8C8C8C;
   	border-style: solid;
   	border-width: 1px;
-  	font-family: Arial;
-	font-size: 8pt;
+  	font-family: Helvetica,Arial;
+	font-size: 10pt;
  	padding: 1px;
 }
 td.mxWindowPane button {
-	background: url('../images/button.gif') repeat-x;
+	-webkit-box-shadow: 0px 0px 0px #C0C0C0;
+	-moz-box-shadow: 0px 0px 0px #C0C0C0;
+	border:1px solid #d7dada;
+	-webkit-border-radius: 2px;
+	-moz-border-radius: 2px;
+	border-radius: 2px;
+	background: -webkit-linear-gradient(top, #F4F5F5, #F0EEEE);
   	font-family: Arial;
-  	font-size: 8pt;
+  	font-size: 10pt;
   	padding: 2px;
+		border-radius: 5px;
+		border-color: #d8d8d8;
+	float: left;
+}
+td.mxWindowPane button:hover {
+	-webkit-box-shadow: 0px 0px 0px #C0C0C0;
+	-moz-box-shadow: 0px 0px 0px #C0C0C0;
+	border:1px solid #bfc4c4;
+	-webkit-border-radius: 2px;
+	-moz-border-radius: 2px;
+	border-radius: 2px;
+	background: -webkit-linear-gradient(top, #DFE3E3, #DBD8D8);
+  	font-family: Arial;
+  	font-size: 10pt;
+  	padding: 2px;
+		border-radius: 5px;
+		border-color: #d8d8d8;
 	float: left;
 }
 img.mxToolbarItem {

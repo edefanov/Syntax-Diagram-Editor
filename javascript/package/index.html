@@ -247,13 +247,8 @@
 				var graph = editor.graph;
 				var scale = graph.view.scale;
 				var bounds = graph.getGraphBounds();
-
-				//editor.graph.fit(0,true,0,true,false,false);
-				//editor.graph.view.rendering = true;
 				editor.graph.refresh();
-				//var documentGraph = mxUtils.show(editor.graph, 'new', 10, 10);
 				var documentGraph = mxUtils.show(editor.graph, 'new', 0, 0, bounds.width, bounds.height);
-				console.log(documentGraph);
 				var svg1 = new XMLSerializer().serializeToString(documentGraph);
 				var SVGCode = svg1.substring(
 					svg1.indexOf("<svg"),
@@ -299,67 +294,28 @@
 				var scale = graph.view.scale;
 				var bounds = graph.getGraphBounds();
 
-			    // Prepares SVG document that holds the output
-			    var svgDoc = mxUtils.createXmlDocument();
-			    var root = (svgDoc.createElementNS != null) ?
-			    	svgDoc.createElementNS(mxConstants.NS_SVG, 'svg') : svgDoc.createElement('svg');
-
-				if (root.style != null)
-				{
-					root.style.backgroundColor = '#FFFFFF';
-				}
-				else
-				{
-					root.setAttribute('style', 'background-color:#FFFFFF');
-				}
-
-			    if (svgDoc.createElementNS == null)
-			    {
-			    	root.setAttribute('xmlns', mxConstants.NS_SVG);
-			    }
-
-			    root.setAttribute('width', Math.ceil(bounds.width * scale + 2) + 'px');
-			    root.setAttribute('height', Math.ceil(bounds.height * scale + 2) + 'px');
-			    root.setAttribute('xmlns:xlink', mxConstants.NS_XLINK);
-			    root.setAttribute('version', '1.1');
-
-			    // Adds group for anti-aliasing via transform
-			    var group = (svgDoc.createElementNS != null) ?
-				    	svgDoc.createElementNS(mxConstants.NS_SVG, 'g') : svgDoc.createElement('g');
-				group.setAttribute('transform', 'translate(0.5,0.5)');
-				root.appendChild(group);
-			    svgDoc.appendChild(root);
-
-			    // Renders graph. Offset will be multiplied with state's scale when painting state.
-			    var svgCanvas = new mxSvgCanvas2D(group);
-			    svgCanvas.translate(Math.floor(1 / scale - bounds.x), Math.floor(1 / scale - bounds.y));
-			    svgCanvas.scale(scale);
-
-			    var imgExport = new mxImageExport();
-			    imgExport.drawState(graph.getView().getState(graph.model.root), svgCanvas);
-
-					var documentGraph = mxUtils.show(editor.graph, 'new', 10, 10);
-					var svg1 = new XMLSerializer().serializeToString(documentGraph);
-					var SVGCode = svg1.substring(
-  					svg1.indexOf("<svg"),
-				    svg1.indexOf("</svg>")+6
-					);
-					var svgBlob = new Blob([SVGCode], {type:"image/svg+xml;charset=utf-8"});
-					var svgUrl = URL.createObjectURL(svgBlob);
-					var downloadLink = document.createElement("a");
-					downloadLink.href = svgUrl;
-					do {
-						var fileName = prompt("SVG File Name", "enter here");
-						if (fileName.indexOf('.svg') == -1) {
-							fileName = fileName + '.svg';
-						}
-					} while (fileName.length > 255 || fileName.length <= 0);
-					downloadLink.download = fileName;
-					document.body.appendChild(downloadLink);
-					downloadLink.click();
-					document.body.removeChild(downloadLink);
-					overlayInput.checked = true;
-					toggleOverlay(editor);
+				var documentGraph = mxUtils.show(editor.graph, 'new', 10, 10);
+				var svg1 = new XMLSerializer().serializeToString(documentGraph);
+				var SVGCode = svg1.substring(
+					svg1.indexOf("<svg"),
+			    svg1.indexOf("</svg>")+6
+				);
+				var svgBlob = new Blob([SVGCode], {type:"image/svg+xml;charset=utf-8"});
+				var svgUrl = URL.createObjectURL(svgBlob);
+				var downloadLink = document.createElement("a");
+				downloadLink.href = svgUrl;
+				do {
+					var fileName = prompt("SVG File Name", "enter here");
+					if (fileName.indexOf('.svg') == -1) {
+						fileName = fileName + '.svg';
+					}
+				} while (fileName.length > 255 || fileName.length <= 0);
+				downloadLink.download = fileName;
+				document.body.appendChild(downloadLink);
+				downloadLink.click();
+				document.body.removeChild(downloadLink);
+				overlayInput.checked = true;
+				toggleOverlay(editor);
 
 
 
@@ -448,12 +404,157 @@
 				fileInputDialog.click();
 			}
 
+			var exportDlg = null;
 			// export dialog function
 			var exportDialog = function()
 			{
+				if (exportDlg)
+				{
+					exportDlg.destroy();
+				}
+				var btnHeight = Math.floor(250 / 7);
 				var tb = document.createElement('div');
-				var wnd = new mxWindow('Export Dialog', tb, 100, 100, 200, null, true, true);
-				wnd.setVisible(true);
+				var html = `<table id='exportDlgTable' width=90% align="center">
+											<tr>
+												<td style="padding-top:12px;padding-bottom:12px">
+													File Name
+												</td><td style="padding-top:12px;padding-bottom:12px">
+													<input style="display:table-cell;width:100%;" id='fileName'></input>
+												</td>
+											</tr><tr>
+												<td style="padding-top:12px;padding-bottom:12px">
+													File Format
+												</td><td style="padding-top:12px;padding-bottom:12px">
+													<select id='fileFormat' style="display:table-cell;width:100%;">
+  												<option value="png">PNG</option>
+			  									<option value="jpeg">JPEG</option>
+									  			<option value="bmp">BMP</option>
+  												<option value="svg">SVG</option>
+													</select>
+												</td>
+											</tr><tr>
+												<td style="padding-top:12px;padding-bottom:12px"></td><td style="padding-top:12px;padding-bottom:12px">
+													<button style='float:right;margin-left:12px;height:35px;width:60px' id='exportcBtn'>Cancel</button>
+													<button style='float:right;height:35px;width:60px;background:#4b8cf7;color:#ffffff;border-color:#3079ed;' id='exportBtn'>Export</button>
+												</td>
+											</tr>
+										</table>`;
+				tb.innerHTML = html;
+				var dlgX = document.getElementById('exportWindow').getBoundingClientRect().left;
+				var dlgY = document.getElementById('exportWindow').getBoundingClientRect().bottom;
+				exportDlg = new mxWindow('Export Dialog', tb, dlgX, dlgY, 300, undefined, true, true, undefined);
+				exportDlg.setClosable(true);
+				exportDlg.setMinimizable(false);
+				exportDlg.setVisible(true);
+				document.getElementById('exportWindow').disabled = true;
+				var cancelButton = document.getElementById('exportcBtn');
+				cancelButton.onclick = function()
+				{
+					exportDlg.destroy();
+					document.getElementById('exportWindow').disabled = false;
+				}
+
+				var submitButton = document.getElementById('exportBtn');
+				submitButton.onclick = function()
+				{
+					var fileFormat = document.getElementById('fileFormat').value;
+					var fileName = document.getElementById('fileName').value;
+					if (fileName < 255 && fileName > 0)
+					{
+						overlayInput.checked = false;
+						toggleOverlay(editor);
+						var graph = editor.graph;
+						var scale = graph.view.scale;
+						var bounds = graph.getGraphBounds();
+						var documentGraph = mxUtils.show(editor.graph, 'new', 0, 0, bounds.width, bounds.height);
+						var svg1 = new XMLSerializer().serializeToString(documentGraph);
+						var SVGCode = svg1.substring(
+							svg1.indexOf("<svg"),
+							svg1.indexOf("</svg>")+6
+						);
+						document.getElementById('exportWindow').disabled = false;
+						if (fileFormat == 'svg')
+						{
+							var svgBlob = new Blob([SVGCode], {type:"image/svg+xml;charset=utf-8"});
+							var svgUrl = URL.createObjectURL(svgBlob);
+							var downloadLink = document.createElement("a");
+							downloadLink.href = svgUrl;
+							downloadLink.download = fileName;
+							document.body.appendChild(downloadLink);
+							downloadLink.click();
+							document.body.removeChild(downloadLink);
+							overlayInput.checked = true;
+							toggleOverlay(editor);
+							exportDlg.hide();
+						} else if (fileFormat == 'png') {
+							var canvas = document.createElement('canvas');
+							canvas.width = bounds.width;
+							canvas.height = bounds.height;
+							canvas.style.width = bounds.width;
+							canvas.style.height = bounds.height;
+							console.log(canvas);
+							canvg(canvas, SVGCode, {userCORS: true, ignoreDimensions: true});
+							var dataURL = canvas.toDataURL('image/png');
+							var data = atob(dataURL.substring('data:image/png;base64,'.length)),
+			    			asArray = new Uint8Array(data.length);
+							for (var i = 0, len = data.length; i < len; ++i) {
+			  					asArray[i] = data.charCodeAt(i);
+							}
+							var pngBlob = new Blob([asArray.buffer], {type: 'image/png'});
+							var pngUrl = URL.createObjectURL(pngBlob);
+							var downloadLink = document.createElement("a");
+							downloadLink.href = pngUrl;
+							downloadLink.download = fileName;
+							document.body.appendChild(downloadLink);
+							downloadLink.click();
+							document.body.removeChild(downloadLink);
+							overlayInput.checked = true;
+							toggleOverlay(editor);
+							exportDlg.hide();
+						} else {
+							var canvas = document.createElement('canvas');
+							canvas.width = bounds.width;
+							canvas.height = bounds.height;
+							canvas.style.width = bounds.width;
+							canvas.style.height = bounds.height;
+							canvas.style.backgroundColor = 'rgba(255, 255, 255, 1)';
+							var hdc = canvas.getContext('2d');
+							hdc.fillStyle = "#ffffff";
+    					hdc.fillRect(0,0,canvas.width,canvas.height);
+    					canvas.style.opacity = '1';
+							if (fileFormat == 'jpeg')
+							{
+								var insertP = SVGCode.indexOf('>')
+								var insertString = `<rect width="100%" height="100%" fill="white"/>`
+								var SVGCode = SVGCode.slice(0, insertP+1) + insertString + SVGCode.slice(insertP+1);
+							}
+							canvg(canvas, SVGCode, {userCORS: true, ignoreDimensions: true});
+							var mimeString = 'image/' + fileFormat;
+							var dataURL = canvas.toDataURL(mimeString);
+							var data = atob(dataURL.substring(('data:' + mimeString + ';base64,').length)),
+			    			asArray = new Uint8Array(data.length);
+							for (var i = 0, len = data.length; i < len; ++i) {
+			  					asArray[i] = data.charCodeAt(i);
+							}
+							var pngBlob = new Blob([asArray.buffer], {type: mimeString});
+							var pngUrl = URL.createObjectURL(pngBlob);
+							var downloadLink = document.createElement("a");
+							downloadLink.href = pngUrl;
+							fileName = fileName + '.' + fileFormat;
+							downloadLink.download = fileName;
+							document.body.appendChild(downloadLink);
+							downloadLink.click();
+							document.body.removeChild(downloadLink);
+							overlayInput.checked = true;
+							toggleOverlay(editor);
+							exportDlg.hide();
+						}
+					}
+					if (!exportDlg.isVisible())
+					{
+						exportDlg.destroy();
+					}
+				}
 			}
 
 			// binding actions
@@ -469,8 +570,8 @@
 			for (var i = 0; i < buttons.length; i++)
 			{
 				var button = document.createElement('button');
+				button.id = buttons[i];
 				mxUtils.write(button, mxResources.get(buttons[i]));
-
 				var factory = function(name)
 				{
 					return function()
@@ -1363,14 +1464,14 @@
 					// !!!DONE!!! refactor connections - consistent distances between cells, add arrows
 					// !!!DONE!!! add vertical elements editing
 					// !!!DONE!!! image saving
-					// image saving through a pop up window
+					// !!!DONE!!! image saving through a pop up window
 					// fix vertical functionality (single source/target and target<source)
 					// !!!DONE!!! xml saving
 					// !!!DONE!!! redo gui
 					// !!!DONE!!! rectangle width based on text width
 					// !!!DONE!!! add overlays processing to xml opening
 					// !!!DONE!!! implement local storage
-					// file ierarchy and dependencies cleanup
+					// !!!DONE!!! file ierarchy and dependencies cleanup
 					editor.graph.refresh();
 			}
 		})
