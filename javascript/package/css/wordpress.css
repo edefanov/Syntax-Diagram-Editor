@@ -621,4 +621,8 @@ a img {
 	margin-top: 10px;
 	margin-bottom: 60px;
 	}
+
+img.mxToolbarMode {
+		margin-right: 7px;
+	}
 /* End Various Tags & Classes*/
