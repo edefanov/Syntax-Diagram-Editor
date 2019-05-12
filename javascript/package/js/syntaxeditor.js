@@ -275,7 +275,7 @@
       var fileName = prompt("XML File Name (without extension)", "filename");
       if (fileName != null && fileName.length < 255 && fileName.length > 0)
       {
-        if (fileName.indexOf('.xml') == -1)
+        if (fileName.indexOf('.xml') == -1 || fileName.indexOf('.xml') != fileName.length-5)
         {
           fileName = fileName + '.xml';
         }
@@ -286,7 +286,13 @@
         var result = encoder.encode(editor.graph.getModel());
         var fileContent = mxUtils.getXml(result);
         var blob = new Blob([fileContent], {type: "text/xml;charset=utf-8"});
-        saveAs(blob, fileName);
+        var xmlUrl = URL.createObjectURL(blob);
+        var downloadLink = document.createElement("a");
+        downloadLink.href = xmlUrl;
+        downloadLink.download = fileName;
+        document.body.appendChild(downloadLink);
+        downloadLink.click();
+        document.body.removeChild(downloadLink);
       }
     }
 
@@ -470,8 +476,6 @@
     // binding actions
     editor.addAction('openlocal', loadFromLocal);
     editor.addAction('savelocal', saveToLocal);
-    // editor.addAction('exportSvg', exportSvg);
-    // editor.addAction('exportImage', exportImage);
     editor.addAction('new', newDoc);
     editor.addAction('open', openDialog);
     editor.addAction('save', saveDialog);
@@ -1372,7 +1376,12 @@
             stringClone.setAttribute('label', labelNewString);
             // getting text width and resizing the rectangle if needed
             var contGeo = stringClone.getGeometry();
-            contGeo.width = Math.round(getTextWidth(labelNewString, '11px arial')) + 30;
+            if (labelNewString.length == 1)
+            {
+              contGeo.width = Math.round(getTextWidth(labelNewString, '11px arial')) + 10;
+            } else {
+              contGeo.width = Math.round(getTextWidth(labelNewString, '11px arial')) + 30;
+            }
             editor.graph.model.setGeometry(stringClone, contGeo);
 
             // searching for far right cell x coordinate
@@ -1382,11 +1391,10 @@
               var cellType = containerChildren[i].getValue();
               if (cellType.tagName == 'Rect' || cellType.tagName == 'Roundrect') {
                 var geoCompare = containerChildren[i].getGeometry();
-                // console.log('geoCompare.x = ', geoCompare.x);
-                  if (geoCompare.x > farRightX && geoCompare.y == secondEllipseGeo.y-6) {
-                    farRightX = geoCompare.x + geoCompare.width;
-                    var geoCompareF = geoCompare;
-                  }
+                if (geoCompare.x > farRightX && geoCompare.y == secondEllipseGeo.y-6) {
+                  farRightX = geoCompare.x + geoCompare.width;
+                  var geoCompareF = geoCompare;
+                }
               }
             }
             // searching for far right edge point
@@ -1426,15 +1434,17 @@
             // resizing container to the right (using the far right coordinate + offset) and moving the right ellipse  + overlay
             var farRightX1 = 0
             var containerChildren1 = editor.graph.model.getChildren(newContainer);
+            console.log(containerChildren1);
             for (i = 0; i < containerChildren1.length; i++) {
-              var cellType1 = containerChildren1[i].getValue();
-              var geoCompare1 = containerChildren[i].getGeometry();
-                  if (geoCompare1.x > farRightX) {
+              var geoCompare1 = containerChildren[i].geometry;
+                  if (geoCompare1.x+geoCompare1.width > farRightX1) {
                     farRightX1 = geoCompare1.x + geoCompare1.width;
+                    console.log('farrightx1', farRightX1);
+                    console.log('far right cell', geoCompare1);
                   }
             }
-            var containerGeo = editor.graph.getCellGeometry(newContainer).clone();
-            containerGeo.width = farRightX1 + 55;
+            var containerGeo = newContainer.geometry;
+            containerGeo.width = farRightX1*1.15;
             secondEllipseGeo.x = containerGeo.width-10;
             editor.graph.model.setGeometry(secondEllipse, secondEllipseGeo);
             editor.graph.model.setGeometry(newContainer, containerGeo);
@@ -1443,6 +1453,7 @@
             var vertGeo = editor.graph.getCellGeometry(vert).clone();
             vertGeo.x = Math.round(containerGeo.width / 2) - vertGeo.width/2;
             editor.graph.model.setGeometry(vert, vertGeo);
+            editor.graph.refresh();
           }
 
         });
@@ -1540,7 +1551,12 @@
           stringClone.setAttribute('label', labelNewString);
           // getting text width and resizing the rectangle if needed
           var contGeo = stringClone.getGeometry();
-          contGeo.width = Math.round(getTextWidth(labelNewString, '11px arial')) + 30;
+          if (labelNewString.length == 1)
+          {
+            contGeo.width = Math.round(getTextWidth(labelNewString, '11px arial')) + 10;
+          } else {
+            contGeo.width = Math.round(getTextWidth(labelNewString, '11px arial')) + 30;
+          }
           editor.graph.model.setGeometry(stringClone, contGeo);
 
           // searching for far right cell x coordinate
@@ -1596,14 +1612,13 @@
           var farRightX1 = 0
           var containerChildren1 = editor.graph.model.getChildren(newContainer);
           for (i = 0; i < containerChildren1.length; i++) {
-            var cellType1 = containerChildren1[i].getValue();
             var geoCompare1 = containerChildren[i].getGeometry();
-                if (geoCompare1.x > farRightX) {
-                  farRightX1 = geoCompare1.x + geoCompare1.width;
-                }
+            if (geoCompare1.x+geoCompare1.width > farRightX1) {
+              farRightX1 = geoCompare1.x + geoCompare1.width;
+            }
           }
-          var containerGeo = editor.graph.getCellGeometry(newContainer).clone();
-          containerGeo.width = farRightX1 + 55;
+          var containerGeo = newContainer.geometry;
+          containerGeo.width = farRightX1*1.15;
           secondEllipseGeo.x = containerGeo.width-10;
           editor.graph.model.setGeometry(secondEllipse, secondEllipseGeo);
           editor.graph.model.setGeometry(newContainer, containerGeo);
@@ -1612,6 +1627,7 @@
           var vertGeo = editor.graph.getCellGeometry(vert).clone();
           vertGeo.x = Math.round(containerGeo.width / 2) - vertGeo.width/2;
           editor.graph.model.setGeometry(vert, vertGeo);
+          editor.graph.refresh();
         }
 
       });
