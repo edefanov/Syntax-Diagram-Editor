@@ -83,3 +83,4 @@ zoomFit=Fit Graph
 zoomIn=Zoom In
 zoomOut=Zoom Out
 zoomAct=Actual
+openHelp=Help

@@ -321,7 +321,7 @@ function onInit(editor)
 
   // Create select actions in page
   var node = document.getElementById('mainActions');
-  var buttons = ['new', 'open', 'savelocal', 'save', 'exportWindow', 'cut', 'copy', 'paste', 'delete', 'undo', 'redo', 'print'];
+  var buttons = ['new', 'open', 'savelocal', 'save', 'exportWindow', 'openHelp', 'cut', 'copy', 'paste', 'delete', 'undo', 'redo', 'print'];
 
   // add openlocal if there is a state in localstorage
   if (localStorage.getItem('state') != null)
@@ -560,6 +560,12 @@ function onInit(editor)
     }
   }
 
+  // open help page function
+  var openHelp = function()
+  {
+    window.open('../../../index.html', '_blank');
+  }
+
   // binding actions
   editor.addAction('openlocal', loadFromLocal);
   editor.addAction('savelocal', saveToLocal);
@@ -567,6 +573,7 @@ function onInit(editor)
   editor.addAction('open', openDialog);
   editor.addAction('save', saveDialog);
   editor.addAction('exportWindow', exportDialog);
+  editor.addAction('openHelp', openHelp);
 
   for (var i = 0; i < buttons.length; i++)
   {
