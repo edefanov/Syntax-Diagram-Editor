@@ -55588,7 +55588,7 @@ mxGraph.prototype.panDy = 0;
  * Specifies the <mxImage> to indicate a collapsed state.
  * Default value is mxClient.imageBasePath + '/collapsed.gif'
  */
-mxGraph.prototype.collapsedImage = new mxImage(mxClient.imageBasePath + '/collapsed.gif', 0, 0);
+mxGraph.prototype.collapsedImage = new mxImage(mxClient.imageBasePath + '/transparent.gif', 0, 0);
 
 /**
  * Variable: expandedImage
@@ -55596,7 +55596,7 @@ mxGraph.prototype.collapsedImage = new mxImage(mxClient.imageBasePath + '/collap
  * Specifies the <mxImage> to indicate a expanded state.
  * Default value is mxClient.imageBasePath + '/expanded.gif'
  */
-mxGraph.prototype.expandedImage = new mxImage(mxClient.imageBasePath + '/expanded.gif', 0, 0);
+mxGraph.prototype.expandedImage = new mxImage(mxClient.imageBasePath + '/transparent.gif', 0, 0);
 
 /**
  * Variable: warningImage

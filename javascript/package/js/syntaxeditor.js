@@ -668,7 +668,8 @@ function onInit(editor)
                 }
               }
               if (coincd1 > 0) {
-                editor.graph.model.setStyle(containerChildren[z], 'Rect')
+                editor.graph.model.setStyle(containerChildren[z], 'Rect');
+								coincd1 = 0;
               }
             }
           }
@@ -1458,6 +1459,7 @@ function onInit(editor)
       overlay.addListener(mxEvent.CLICK, function(sender, evt2)
       {
         editor.graph.clearSelection();
+				variables = nonTerminalsList();
         var labelNewString = prompt("New Element Name", "Enter here");
         var coincd = 0;
         if (labelNewString != null) {
@@ -1539,8 +1541,6 @@ function onInit(editor)
             var geoCompare1 = containerChildren[i].geometry;
                 if (geoCompare1.x+geoCompare1.width > farRightX1) {
                   farRightX1 = geoCompare1.x + geoCompare1.width;
-                  console.log('farrightx1', farRightX1);
-                  console.log('far right cell', geoCompare1);
                 }
           }
           var containerGeo = newContainer.geometry;
