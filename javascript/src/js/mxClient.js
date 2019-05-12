@@ -6013,160 +6013,161 @@ var mxUtils =
 	 * w - Optional width of the graph view.
 	 * h - Optional height of the graph view.
 	 */
-	show: function(graph, doc, x0, y0, w, h)
-	{
-		x0 = (x0 != null) ? x0 : 0;
-		y0 = (y0 != null) ? y0 : 0;
+   show: function(graph, doc, x0, y0, w, h)
+ 	{
+ 		x0 = (x0 != null) ? x0 : 0;
+ 		y0 = (y0 != null) ? y0 : 0;
 
-		if (doc == null)
-		{
-			var wnd = window.open();
-			doc = wnd.document;
-		}
-		else
-		{
-			doc.open();
-		}
+ 		if (doc == null)
+ 		{
+ 			var wnd = window.open();
+ 			doc = wnd.document;
+ 		} else if (doc == 'new') {
+       var impl = document.implementation;
+       doc = impl.createHTMLDocument(null);
+     } else {
+ 			doc.open();
+ 		}
 
-		// Workaround for missing print output in IE9 standards
-		if (document.documentMode == 9)
-		{
-			doc.writeln('<!--[if IE]><meta http-equiv="X-UA-Compatible" content="IE=9"><![endif]-->');
-		}
+ 		// Workaround for missing print output in IE9 standards
+ 		if (document.documentMode == 9)
+ 		{
+ 			doc.writeln('<!--[if IE]><meta http-equiv="X-UA-Compatible" content="IE=9"><![endif]-->');
+ 		}
 
-		var bounds = graph.getGraphBounds();
-		var dx = Math.ceil(x0 - bounds.x);
-		var dy = Math.ceil(y0 - bounds.y);
+ 		var bounds = graph.getGraphBounds();
+ 		var dx = Math.ceil(x0 - bounds.x);
+ 		var dy = Math.ceil(y0 - bounds.y);
 
-		if (w == null)
-		{
-			w = Math.ceil(bounds.width + x0) + Math.ceil(Math.ceil(bounds.x) - bounds.x);
-		}
+ 		if (w == null)
+ 		{
+ 			w = Math.ceil(bounds.width + x0) + Math.ceil(Math.ceil(bounds.x) - bounds.x);
+ 		}
 
-		if (h == null)
-		{
-			h = Math.ceil(bounds.height + y0) + Math.ceil(Math.ceil(bounds.y) - bounds.y);
-		}
+ 		if (h == null)
+ 		{
+ 			h = Math.ceil(bounds.height + y0) + Math.ceil(Math.ceil(bounds.y) - bounds.y);
+ 		}
 
-		// Needs a special way of creating the page so that no click is required
-		// to refresh the contents after the external CSS styles have been loaded.
-		// To avoid a click or programmatic refresh, the styleSheets[].cssText
-		// property is copied over from the original document.
-		if (mxClient.IS_IE || document.documentMode == 11)
-		{
-			var html = '<html><head>';
+ 		// Needs a special way of creating the page so that no click is required
+ 		// to refresh the contents after the external CSS styles have been loaded.
+ 		// To avoid a click or programmatic refresh, the styleSheets[].cssText
+ 		// property is copied over from the original document.
+ 		if (mxClient.IS_IE || document.documentMode == 11)
+ 		{
+ 			var html = '<html><head>';
 
-			var base = document.getElementsByTagName('base');
+ 			var base = document.getElementsByTagName('base');
 
-			for (var i = 0; i < base.length; i++)
-			{
-				html += base[i].outerHTML;
-			}
+ 			for (var i = 0; i < base.length; i++)
+ 			{
+ 				html += base[i].outerHTML;
+ 			}
 
-			html += '<style>';
+ 			html += '<style>';
 
-			// Copies the stylesheets without having to load them again
-			for (var i = 0; i < document.styleSheets.length; i++)
-			{
-				try
-				{
-					html += document.styleSheets[i].cssText;
-				}
-				catch (e)
-				{
-					// ignore security exception
-				}
-			}
+ 			// Copies the stylesheets without having to load them again
+ 			for (var i = 0; i < document.styleSheets.length; i++)
+ 			{
+ 				try
+ 				{
+ 					html += document.styleSheets[i].cssText;
+ 				}
+ 				catch (e)
+ 				{
+ 					// ignore security exception
+ 				}
+ 			}
 
-			html += '</style></head><body style="margin:0px;">';
+ 			html += '</style></head><body style="margin:0px;">';
 
-			// Copies the contents of the graph container
-			html += '<div style="position:absolute;overflow:hidden;width:' + w + 'px;height:' + h + 'px;"><div style="position:relative;left:' + dx + 'px;top:' + dy + 'px;">';
-			html += graph.container.innerHTML;
-			html += '</div></div></body><html>';
+ 			// Copies the contents of the graph container
+ 			html += '<div style="position:absolute;overflow:hidden;width:' + w + 'px;height:' + h + 'px;"><div style="position:relative;left:' + dx + 'px;top:' + dy + 'px;">';
+ 			html += graph.container.innerHTML;
+ 			html += '</div></div></body><html>';
 
-			doc.writeln(html);
-			doc.close();
-		}
-		else
-		{
-			doc.writeln('<html><head>');
+ 			doc.writeln(html);
+ 			doc.close();
+ 		}
+ 		else
+ 		{
+ 			doc.writeln('<html><head>');
 
-			var base = document.getElementsByTagName('base');
+ 			var base = document.getElementsByTagName('base');
 
-			for (var i = 0; i < base.length; i++)
-			{
-				doc.writeln(mxUtils.getOuterHtml(base[i]));
-			}
+ 			for (var i = 0; i < base.length; i++)
+ 			{
+ 				doc.writeln(mxUtils.getOuterHtml(base[i]));
+ 			}
 
-			var links = document.getElementsByTagName('link');
+ 			var links = document.getElementsByTagName('link');
 
-			for (var i = 0; i < links.length; i++)
-			{
-				doc.writeln(mxUtils.getOuterHtml(links[i]));
-			}
+ 			for (var i = 0; i < links.length; i++)
+ 			{
+ 				doc.writeln(mxUtils.getOuterHtml(links[i]));
+ 			}
 
-			var styles = document.getElementsByTagName('style');
+ 			var styles = document.getElementsByTagName('style');
 
-			for (var i = 0; i < styles.length; i++)
-			{
-				doc.writeln(mxUtils.getOuterHtml(styles[i]));
-			}
+ 			for (var i = 0; i < styles.length; i++)
+ 			{
+ 				doc.writeln(mxUtils.getOuterHtml(styles[i]));
+ 			}
 
-			doc.writeln('</head><body style="margin:0px;"></body></html>');
-			doc.close();
+ 			doc.writeln('</head><body style="margin:0px;"></body></html>');
+ 			doc.close();
 
-			var outer = doc.createElement('div');
-			outer.position = 'absolute';
-			outer.overflow = 'hidden';
-			outer.style.width = w + 'px';
-			outer.style.height = h + 'px';
+ 			var outer = doc.createElement('div');
+ 			outer.position = 'absolute';
+ 			outer.overflow = 'hidden';
+ 			outer.style.width = w + 'px';
+ 			outer.style.height = h + 'px';
 
-			// Required for HTML labels if foreignObjects are disabled
-			var div = doc.createElement('div');
-			div.style.position = 'absolute';
-			div.style.left = dx + 'px';
-			div.style.top = dy + 'px';
+ 			// Required for HTML labels if foreignObjects are disabled
+ 			var div = doc.createElement('div');
+ 			div.style.position = 'absolute';
+ 			div.style.left = dx + 'px';
+ 			div.style.top = dy + 'px';
 
-			var node = graph.container.firstChild;
-			var svg = null;
+ 			var node = graph.container.firstChild;
+ 			var svg = null;
 
-			while (node != null)
-			{
-				var clone = node.cloneNode(true);
+ 			while (node != null)
+ 			{
+ 				var clone = node.cloneNode(true);
 
-				if (node == graph.view.drawPane.ownerSVGElement)
-				{
-					outer.appendChild(clone);
-					svg = clone;
-				}
-				else
-				{
-					div.appendChild(clone);
-				}
+ 				if (node == graph.view.drawPane.ownerSVGElement)
+ 				{
+ 					outer.appendChild(clone);
+ 					svg = clone;
+ 				}
+ 				else
+ 				{
+ 					div.appendChild(clone);
+ 				}
 
-				node = node.nextSibling;
-			}
+ 				node = node.nextSibling;
+ 			}
 
-			doc.body.appendChild(outer);
+ 			doc.body.appendChild(outer);
 
-			if (div.firstChild != null)
-			{
-				doc.body.appendChild(div);
-			}
+ 			if (div.firstChild != null)
+ 			{
+ 				doc.body.appendChild(div);
+ 			}
 
-			if (svg != null)
-			{
-				svg.style.minWidth = '';
-				svg.style.minHeight = '';
-				svg.firstChild.setAttribute('transform', 'translate(' + dx + ',' + dy + ')');
-			}
-		}
+ 			if (svg != null)
+ 			{
+ 				svg.style.minWidth = '';
+ 				svg.style.minHeight = '';
+ 				svg.firstChild.setAttribute('transform', 'translate(' + dx + ',' + dy + ')');
+ 			}
+ 		}
 
-		mxUtils.removeCursors(doc.body);
+ 		mxUtils.removeCursors(doc.body);
 
-		return doc;
-	},
+ 		return doc;
+ 	},
 
 	/**
 	 * Function: printScreen
