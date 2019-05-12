@@ -85165,10 +85165,10 @@ mxEditor.prototype.createProperties = function (cell)
 
 			if (geo != null)
 			{
-				yField = form.addText('top', geo.y);
-				xField = form.addText('left', geo.x);
-				widthField = form.addText('width', geo.width);
-				heightField = form.addText('height', geo.height);
+				yField = form.addText('Top', geo.y);
+				xField = form.addText('Left', geo.x);
+				widthField = form.addText('Width', geo.width);
+				heightField = form.addText('Height', geo.height);
 			}
 		}
 
@@ -85181,14 +85181,30 @@ mxEditor.prototype.createProperties = function (cell)
 		var attrs = value.attributes;
 		var texts = [];
 
+    if (tmp == 'rounded' || tmp == 'Rect')
+    {
+      var appearance = form.addCombo('Type', false, 2);
+      if (tmp == 'rounded')
+      {
+        form.addOption(appearance, 'Terminal', 0, true);
+        form.addOption(appearance, 'Non-Terminal', 1, false);
+      } else {
+        form.addOption(appearance, 'Terminal', 0, false);
+        form.addOption(appearance, 'Non-Terminal', 1, true);
+      }
+    }
+
+
 		for (var i = 0; i < attrs.length; i++)
 		{
 			// Creates a textarea with more lines for
 			// the cell label
 			var val = attrs[i].value;
 			texts[i] = form.addTextarea(attrs[i].nodeName, val,
-				(attrs[i].nodeName == 'label') ? 4 : 2);
+				(attrs[i].nodeName == 'Name') ? 2 : 2);
 		}
+
+
 
 		// Adds an OK and Cancel button to the dialog
 		// contents and implements the respective
@@ -85227,6 +85243,13 @@ mxEditor.prototype.createProperties = function (cell)
 				{
 					model.setStyle(cell, null);
 				}
+
+        if (appearance.value == 0)
+        {
+          model.setStyle(cell, 'rounded');
+        } else if (appearance.value == 1) {
+          model.setStyle(cell, 'Rect');
+        }
 
 				// Creates an undoable change for each
 				// attribute and executes it using the
