@@ -321,7 +321,7 @@ function onInit(editor)
 
   // Create select actions in page
   var node = document.getElementById('mainActions');
-  var buttons = ['new', 'open', 'savelocal', 'save', 'exportWindow', 'openHelp', 'cut', 'copy', 'paste', 'delete', 'undo', 'redo', 'print'];
+  var buttons = ['new', 'clearCurrent', 'open', 'savelocal', 'save', 'exportWindow', 'openHelp', 'cut', 'copy', 'paste', 'delete', 'undo', 'redo', 'print'];
 
   // add openlocal if there is a state in localstorage
   if (localStorage.getItem('state') != null)
@@ -460,7 +460,7 @@ function onInit(editor)
     var submitButton = document.getElementById('exportBtn');
     submitButton.onclick = function()
     {
-      console.log('onclick');
+			editor.graph.clearSelection();
       var fileFormat = document.getElementById('fileFormat').value;
       var fileName = document.getElementById('fileName').value;
       if (fileName.length < 255 && fileName.length > 0)
@@ -566,6 +566,12 @@ function onInit(editor)
     window.open('../../index.html', '_blank');
   }
 
+	// clear current graph
+	var clearCurrent = function()
+	{
+		editor.graph.getModel().clear();
+	}
+
   // binding actions
   editor.addAction('openlocal', loadFromLocal);
   editor.addAction('savelocal', saveToLocal);
@@ -574,6 +580,7 @@ function onInit(editor)
   editor.addAction('save', saveDialog);
   editor.addAction('exportWindow', exportDialog);
   editor.addAction('openHelp', openHelp);
+	editor.addAction('clearCurrent', clearCurrent);
 
   for (var i = 0; i < buttons.length; i++)
   {
