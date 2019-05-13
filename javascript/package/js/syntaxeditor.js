@@ -563,7 +563,7 @@ function onInit(editor)
   // open help page function
   var openHelp = function()
   {
-    window.open('../../index.html', '_blank');
+    window.open('../../index.html?noskip=1', '_blank');
   }
 
 	// clear current graph
