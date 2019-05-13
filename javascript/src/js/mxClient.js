@@ -85182,9 +85182,11 @@ mxEditor.prototype.createProperties = function (cell)
 		var attrs = value.attributes;
 		var texts = [];
 
+    var appearanceFlag = false;
     if (tmp == 'rounded' || tmp == 'Rect')
     {
       var appearance = form.addCombo('Type', false, 2);
+      var appearanceFlag = true;
       if (tmp == 'rounded')
       {
         form.addOption(appearance, 'Terminal', 0, true);
@@ -85245,12 +85247,16 @@ mxEditor.prototype.createProperties = function (cell)
 					model.setStyle(cell, null);
 				}
 
-        if (appearance.value == 0)
+        if (appearanceFlag == true)
         {
-          model.setStyle(cell, 'rounded');
-        } else if (appearance.value == 1) {
-          model.setStyle(cell, 'Rect');
+          if (appearance.value == 0)
+          {
+            model.setStyle(cell, 'rounded');
+          } else if (appearance.value == 1) {
+            model.setStyle(cell, 'Rect');
+          }
         }
+
 
 				// Creates an undoable change for each
 				// attribute and executes it using the
