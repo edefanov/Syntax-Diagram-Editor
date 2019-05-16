@@ -284,7 +284,7 @@ function onInit(editor)
             }
           }
           // getting the big vertical overlays
-          var childCells = containerList[i].children;
+          var childCells = editor.graph.model.getChildCells(containerList[i], true, false);
           for (var z = 0; z < childCells.length; z++) {
             var cellStyle = childCells[z].style
             if (cellStyle == 'image;image=images/add.png;editable=0;movable=0;selectable=0;resizable=0') {
@@ -899,6 +899,22 @@ function onInit(editor)
                   }
                 }
                 var bottomY = firstEllipse.geometry.y + firstEllipse.geometry.height/2 + 30;
+								console.log(bottomY);
+
+								// determine special conditions (specialCase == 1 if the target and source are the same point, == 2 if source > target)
+								var scFlag = false;
+								var specialCase = 0;
+								if (clickedOn[0] == clickedOn[2] && clickedOn[1] == clickedOn[3])
+								{
+									specialCase = 1;
+								}
+								if (clickedOn[0] > clickedOn[2])
+								{
+									specialCase = 2;
+									var tmp = clickedOn[0];
+									clickedOn[0] = clickedOn[2];
+									clickedOn[2] = tmp;
+								}
 
                 // find the lowest Y in the specified X range
                 var containerChildren = editor.graph.model.getChildren(newContainer);
@@ -908,7 +924,8 @@ function onInit(editor)
                   if (cellType.tagName == 'Connector')
                   {
                       var childEdges = editor.graph.getChildEdges(containerChildren[i]);
-                      if (childEdges != undefined)
+											console.log(childEdges);
+                      if (childEdges != [])
                       {
                         for (var j = 0; j < childEdges.length; j++)
                         {
@@ -925,22 +942,9 @@ function onInit(editor)
                       }
                   }
                 }
-                var setY = bottomY + 30;
+								var setY = bottomY+30;
 
-                // determine special conditions (specialCase == 1 if the target and source are the same point, == 2 if source > target)
-                var scFlag = false;
-                var specialCase = 0;
-                if (clickedOn[0] == clickedOn[2] && clickedOn[1] == clickedOn[3])
-                {
-                  specialCase = 1;
-                }
-                if (clickedOn[0] > clickedOn[2])
-                {
-                  specialCase = 2;
-                  var tmp = clickedOn[0];
-                  clickedOn[0] = clickedOn[2];
-                  clickedOn[2] = tmp;
-                }
+
 
                 var pointOffset = 30;
                 // left line
@@ -953,9 +957,9 @@ function onInit(editor)
                   cellE.geometry.setTerminalPoint(new mxPoint(clickedOn[0], clickedOn[1]), true);
                   cellE.geometry.setTerminalPoint(new mxPoint(clickedOn[0]+pointOffset, setY), false);
                 } else if (specialCase == 2) {
-                  cellE.geometry.setTerminalPoint(new mxPoint(clickedOn[0]+15, clickedOn[1]), false);
-                  cellE.geometry.points = [new mxPoint(clickedOn[0], clickedOn[1]+5)];
-                  cellE.geometry.setTerminalPoint(new mxPoint(clickedOn[0]+pointOffset, setY), true);
+                  cellE.geometry.setTerminalPoint(new mxPoint(clickedOn[0]+30, clickedOn[1]), false);
+                  cellE.geometry.points = [new mxPoint(clickedOn[0]+15, clickedOn[1]+5)];
+                  cellE.geometry.setTerminalPoint(new mxPoint(clickedOn[0]+30, setY), true);
                 }
                 cellE.edge = true;
                 cellE = editor.graph.addCell(cellE, ellipseEdge);
@@ -971,9 +975,9 @@ function onInit(editor)
                   cellE2.geometry.setTerminalPoint(new mxPoint(clickedOn[2]-pointOffset, setY), false);
                   cellE2.geometry.setTerminalPoint(new mxPoint(clickedOn[2], clickedOn[3]), true);
                 } else if (specialCase == 2) {
-                  cellE2.geometry.setTerminalPoint(new mxPoint(clickedOn[2]-pointOffset, setY), false);
-                  cellE2.geometry.points = [new mxPoint(clickedOn[2], clickedOn[3]+5)];
-                  cellE2.geometry.setTerminalPoint(new mxPoint(clickedOn[2]-15, clickedOn[3]), true);
+                  cellE2.geometry.setTerminalPoint(new mxPoint(clickedOn[2]-35, setY), false);
+                  cellE2.geometry.points = [new mxPoint(clickedOn[2]-20, clickedOn[3]+5)];
+                  cellE2.geometry.setTerminalPoint(new mxPoint(clickedOn[2]-35, clickedOn[3]), true);
                 }
                 cellE2.edge = true;
                 cellE2 = editor.graph.addCell(cellE2, ellipseEdge);
@@ -989,8 +993,8 @@ function onInit(editor)
                   cellE3.geometry.setTerminalPoint(new mxPoint(clickedOn[0]+pointOffset, setY), true);
                   cellE3.geometry.setTerminalPoint(new mxPoint(clickedOn[2]-pointOffset, setY), false);
                 } else if (specialCase == 2) {
-                  cellE3.geometry.setTerminalPoint(new mxPoint(clickedOn[0]+pointOffset, setY), false);
-                  cellE3.geometry.setTerminalPoint(new mxPoint(clickedOn[2]-pointOffset, setY), true);
+                  cellE3.geometry.setTerminalPoint(new mxPoint(clickedOn[0]+35, setY), false);
+                  cellE3.geometry.setTerminalPoint(new mxPoint(clickedOn[2]-35, setY), true);
                 }
                 cellE3.edge = true;
                 cellE3 = editor.graph.addCell(cellE3, ellipseEdge);
@@ -2277,7 +2281,7 @@ function populateOverlays()
 						var firstEllipseGeo = firstEllipse.geometry;
 						var secondEllipseGeo = secondEllipse.geometry;
 						var bottomY = firstEllipse.geometry.y + firstEllipse.geometry.height/2 + 30;
-
+t
 						// find the lowest Y in the specified X range
 						var containerChildren = editor.graph.model.getChildren(newContainer);
 						for (i = 0; i < containerChildren.length; i++)
