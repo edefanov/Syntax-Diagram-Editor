@@ -372,6 +372,7 @@ function onInit(editor)
       var encoder = new mxCodec();
       var result = encoder.encode(editor.graph.getModel());
       var fileContent = mxUtils.getXml(result);
+			console.log(fileContent);
 			var xmlString = fileContent;
 			var search = 'mxGraphModel';
 			var rep = 'syntax';
