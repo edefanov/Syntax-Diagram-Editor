@@ -993,7 +993,7 @@ function onInit(editor)
                   cellE3.geometry.setTerminalPoint(new mxPoint(clickedOn[0]+pointOffset, setY), true);
                   cellE3.geometry.setTerminalPoint(new mxPoint(clickedOn[2]-pointOffset, setY), false);
                 } else if (specialCase == 2) {
-                  cellE3.geometry.setTerminalPoint(new mxPoint(clickedOn[0]+35, setY), false);
+                  cellE3.geometry.setTerminalPoint(new mxPoint(clickedOn[0]+30, setY), false);
                   cellE3.geometry.setTerminalPoint(new mxPoint(clickedOn[2]-35, setY), true);
                 }
                 cellE3.edge = true;
@@ -2281,7 +2281,7 @@ function populateOverlays()
 						var firstEllipseGeo = firstEllipse.geometry;
 						var secondEllipseGeo = secondEllipse.geometry;
 						var bottomY = firstEllipse.geometry.y + firstEllipse.geometry.height/2 + 30;
-t
+
 						// find the lowest Y in the specified X range
 						var containerChildren = editor.graph.model.getChildren(newContainer);
 						for (i = 0; i < containerChildren.length; i++)
