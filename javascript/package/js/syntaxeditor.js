@@ -1207,12 +1207,7 @@ function onInit(editor)
                     stringClone.setAttribute('label', labelNewStringV);
                     // getting text width and resizing the rectangle if needed
                     var contGeo = stringClone.getGeometry();
-										if (labelNewStringV.length == 1)
-										{
-											contGeo.width = Math.round(getTextWidth(labelNewStringV, '11px arial')) + 10;
-										} else {
-											contGeo.width = Math.round(getTextWidth(labelNewStringV, '11px arial')) + 30;
-										}
+                    contGeo.width = Math.round(getTextWidth(labelNewStringV, '11px arial')) + 30;
                     editor.graph.model.setGeometry(stringClone, contGeo);
 
                     // searching for far right cell x coordinate
@@ -1861,12 +1856,7 @@ function populateOverlays()
             stringClone.setAttribute('label', labelNewStringV);
             // getting text width and resizing the rectangle if needed
             var contGeo = stringClone.getGeometry();
-						if (labelNewStringV.length == 1)
-						{
-							contGeo.width = Math.round(getTextWidth(labelNewStringV, '11px arial')) + 10;
-						} else {
-							contGeo.width = Math.round(getTextWidth(labelNewStringV, '11px arial')) + 30;
-						}
+            contGeo.width = Math.round(getTextWidth(labelNewStringV, '11px arial')) + 30;
             editor.graph.model.setGeometry(stringClone, contGeo);
 
             // searching for far right cell x coordinate
@@ -2574,12 +2564,7 @@ function populateOverlays()
 								stringClone.setAttribute('label', labelNewStringV);
 								// getting text width and resizing the rectangle if needed
 								var contGeo = stringClone.getGeometry();
-								if (labelNewStringV.length == 1)
-								{
-									contGeo.width = Math.round(getTextWidth(labelNewStringV, '11px arial')) + 10;
-								} else {
-									contGeo.width = Math.round(getTextWidth(labelNewStringV, '11px arial')) + 30;
-								}
+								contGeo.width = Math.round(getTextWidth(labelNewStringV, '11px arial')) + 30;
 								editor.graph.model.setGeometry(stringClone, contGeo);
 
 								// searching for far right cell x coordinate
