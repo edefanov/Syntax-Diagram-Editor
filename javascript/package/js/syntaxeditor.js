@@ -376,7 +376,7 @@ function onInit(editor)
 			var search = 'mxGraphModel';
 			var rep = 'syntax';
 			xmlString = xmlString.split(search).join(rep);
-      var blob = new Blob([fileContent], {type: "text/xml;charset=utf-8"});
+      var blob = new Blob([xmlString], {type: "text/xml;charset=utf-8"});
       var xmlUrl = URL.createObjectURL(blob);
       var downloadLink = document.createElement("a");
       downloadLink.href = xmlUrl;
