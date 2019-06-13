@@ -372,6 +372,10 @@ function onInit(editor)
       var encoder = new mxCodec();
       var result = encoder.encode(editor.graph.getModel());
       var fileContent = mxUtils.getXml(result);
+			var xmlString = fileContent;
+			var search = 'mxGraphModel';
+			var rep = 'syntax';
+			xmlString = xmlString.split(search).join(rep);
       var blob = new Blob([fileContent], {type: "text/xml;charset=utf-8"});
       var xmlUrl = URL.createObjectURL(blob);
       var downloadLink = document.createElement("a");
